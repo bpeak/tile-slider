@@ -1,0 +1,2974 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Tile Slider</title>
+	<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+	<div id="main"><a href="/main">bpeak</a></div>
+	<div class="sub_title">Tile Slider</div>
+	<canvas id="myCanvas" width="500" height="500"></canvas>
+	<script>
+	c = document.getElementById("myCanvas");
+	ctx = c.getContext("2d");
+	
+	//audioㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	//loading
+	var moonCastleAudio = new Audio("./sound/moonCastle.wav");
+	moonCastleAudio.loop = true
+	moonCastleAudio.play();
+	//coin
+	var eatCoinAudio = new Audio("./sound/eatCoin.mp3")
+	//man die
+	var marioDieYoAudio = new Audio("./sound/marioDieYo.wav")
+	//stage
+	//grass
+	var islandAudio = new Audio("./sound/island.wav")
+	islandAudio.volume = 0.5;
+	islandAudio.loop = true
+
+	var grassBossAudio = new Audio("./sound/grassBoss.mp3")   
+	grassBossAudio.loop = true;
+	grassBossAudio.volume = 0.9
+
+	var grassBossDieAudio = new Audio("./sound/grassBossDie.wav") 
+	//desert
+	var desertAudio = new Audio("./sound/desert3.mp3")  
+	desertAudio.loop = true;
+	desertAudio.volume = 0.8
+
+	var desertBossAudio = new Audio("./sound/desertBoss.mp3")
+	desertBossAudio.loop = true;
+	desertBossAudio.volume = 0.9
+
+	var creepyAudio = new Audio("./sound/creepy3.mp3") 
+	creepyAudio.volume = 1
+
+	var explosionAudio = new Audio("./sound/explosion.mp3")  
+	explosionAudio.volume = 1
+
+	var beforeExplosionAudio = new Audio("./sound/beforeExplosion2.mp3") 
+	beforeExplosionAudio.volume = 1
+
+	var desertBossDieAudio = new Audio("./sound/desertBossDie.mp3")
+	desertBossDieAudio.volume = 1
+
+	//ice 
+
+	var iceAudio = new Audio("./sound/ice2.mp3")
+	iceAudio.loop = true
+	iceAudio.volume = 0.8 // 원래 1
+
+	//gameover	
+	var gameoverAudio = new Audio("./sound/shootingStar.mp3") 
+	gameoverAudio.volume = 0.5;
+	gameoverAudio.loop = true;
+
+	
+
+	//loadingㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	//loading backgroundㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	var loadingBackgroundImage = new Image();
+	loadingBackgroundImage.src = "./img/background.jpg"
+   	
+   	function loadingBackgroundDraw(){
+	   	ctx.globalAlpha = 1;
+	   	ctx.drawImage(loadingBackgroundImage, 0, 0, c.width, c.height)
+   	}
+
+	var loading = {}
+	loading.status = 1;
+
+	loading.arc = {}
+	loading.arc.x = c.width/2
+	loading.arc.y = c.height/2
+	loading.arc.r = 50;
+	loading.arc.dr = 0.1;
+	loading.arc.beginAngle = 0;
+	loading.arc.closeAngle = Math.PI*3/4
+	
+	loading.ball = {}
+	loading.ball.r = 9
+
+	loading.text = {}
+	loading.text.opacity = 0.1;
+	loading.text.opacityD = 0.04;
+	loading.text.opcatiyMax = 1.4;
+	loading.text.opcatiyMin = 0.1;
+
+	function loadingArcLineDraw(){
+	ctx.beginPath();
+	ctx.arc(loading.arc.x, loading.arc.y, loading.arc.r, loading.arc.beginAngle, loading.arc.closeAngle, false);
+	ctx.strokeStyle = "#E6E6E6"
+	ctx.lineWidth = 10;
+	ctx.globalAlpha = 1.0;
+	ctx.stroke();
+	ctx.closePath()
+	loading.arc.beginAngle += loading.arc.dr;
+	loading.arc.closeAngle += loading.arc.dr;
+	}
+
+	function loadingArcBallDraw(){
+	ctx.beginPath()
+	ctx.arc(c.width/2 + loading.arc.r * Math.cos(loading.arc.closeAngle), c.height/2 + loading.arc.r * Math.cos(loading.arc.closeAngle), loading.ball.r, 0, Math.PI*2, false)
+	ctx.fillStyle = "#E6E6E6";
+	ctx.globalAlpha = 1.0;
+	ctx.fill()
+	ctx.closePath()
+	}
+
+	function loadingTextDraw(){
+	ctx.font = "italic 20px Arial";
+	ctx.fillStyle = "#E6E6E6";
+	ctx.globalAlpha = loading.text.opacity
+	ctx.fillText("Press any key to start", c.width/2 - 100, c.height/2 + 150);
+
+	loading.text.opacity += loading.text.opacityD;
+	if(loading.text.opacity > loading.text.opcatiyMax || loading.text.opacity < loading.text.opcatiyMin){
+		loading.text.opacityD = -loading.text.opacityD
+	}
+	}
+	//eventlistenerㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	document.addEventListener("keydown", keyDownHandler, false)
+	document.addEventListener("keyup", keyUpHandler, false)
+	//keyboard defaultㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	var keyboard = {}
+	keyboard.right = false
+	keyboard.left = false
+	keyboard.up = false
+	keyboard.down = false
+
+	keyboard.direction = false
+	//handlerㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	function keyDownHandler(e){
+		if(loading.status == 1){
+		loading.status = 0;
+		moonCastleAudio.pause()
+		moonCastleAudio.currentTime = 0;
+		}
+
+		if(e.keyCode == 39){
+			keyboard.right = true;
+			keyboard.direction = true
+		}
+		if(e.keyCode == 37){
+			keyboard.left = true;
+			keyboard.direction = true
+		}
+		if(e.keyCode == 38){
+			keyboard.up = true;
+			keyboard.direction = true
+		}
+		if(e.keyCode == 40){
+			keyboard.down = true;
+			keyboard.direction = true
+		}
+	}
+	function keyUpHandler(e){
+		if(e.keyCode == 39){
+			keyboard.right = false;
+			keyboard.direction = false
+		}
+		if(e.keyCode == 37){
+			keyboard.left = false;
+			keyboard.direction = false
+		}
+		if(e.keyCode == 38){
+			keyboard.up = false;
+			keyboard.direction = false
+		}
+		if(e.keyCode == 40){
+			keyboard.down = false;
+			keyboard.direction = false
+		}
+	}
+	//mainㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	//tileㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	var tileImage = new Image()
+	tileImage.src = "./img/tileImage2321.png"
+
+	tileImage.ele = {}
+	tileImage.ele.w = 736;
+	tileImage.ele.h = 672;
+	tileImage.ele.columns = 23
+	tileImage.ele.rows = 21;
+
+	tileImage.ele.oneSheetW = tileImage.ele.w/tileImage.ele.columns
+	tileImage.ele.oneSheetH = tileImage.ele.h/tileImage.ele.rows
+
+	tile = {
+		w : 50,
+		h : 50,
+		set : {}
+	}
+
+	function TileSetting(x, y, existence){
+		this.x = x
+		this.y = y
+		this.existence = existence
+	}
+
+	tile.set.tree = new TileSetting(0*tileImage.ele.oneSheetW, 1*tileImage.ele.oneSheetH, 0)
+	tile.set.grass = new TileSetting(0*tileImage.ele.oneSheetW, 0*tileImage.ele.oneSheetH, 1)
+	tile.set.desert = new TileSetting(9*tileImage.ele.oneSheetW, 10*tileImage.ele.oneSheetH, 1)
+	tile.set.swamp = new TileSetting(9*tileImage.ele.oneSheetW, 18*tileImage.ele.oneSheetH, 2)
+	tile.set.cactus = new TileSetting(15*tileImage.ele.oneSheetW, 16*tileImage.ele.oneSheetH, 0)
+	//tile.set.taiload = new TileSetting(21*tileImage.ele.oneSheetW, 13*tileImage.ele.oneSheetH, 0)
+	tile.set.egypt = new TileSetting(13*tileImage.ele.oneSheetW, 9*tileImage.ele.oneSheetH, 1)
+	tile.set.pyramid = new TileSetting(22*tileImage.ele.oneSheetW, 7*tileImage.ele.oneSheetH, 0)
+	tile.set.skull = new TileSetting(5*tileImage.ele.oneSheetW, 5*tileImage.ele.oneSheetH, 0)
+	tile.set.blood = new TileSetting(19*tileImage.ele.oneSheetW, 19*tileImage.ele.oneSheetH, 0)
+	tile.set.egypt2 = new TileSetting(14*tileImage.ele.oneSheetW, 9*tileImage.ele.oneSheetH, 1)
+	tile.set.iceberg = new TileSetting(5*tileImage.ele.oneSheetW, 10*tileImage.ele.oneSheetH, 3)
+	tile.set.ice2 = new TileSetting(15*tileImage.ele.oneSheetW, 7*tileImage.ele.oneSheetH, 1)
+
+	function tileDraw(){
+		var tileSrcX
+		var tileSrcY
+		for(i = 0; i < 10; i++){
+		for(j = 0; j < 10; j++){
+			function checkTileStyleSet(tileName){
+				if(stage[currentTileStage][currentStage].tile[i][j] == tileName){
+					tileSrcX = tile.set[tileName].x
+					tileSrcY = tile.set[tileName].y
+				}
+			}
+			checkTileStyleSet("grass")
+			checkTileStyleSet("tree")
+			checkTileStyleSet("ice")
+			checkTileStyleSet("desert")
+			checkTileStyleSet("swamp")
+			checkTileStyleSet("cactus")
+			checkTileStyleSet("egypt")
+			checkTileStyleSet("pyramid")
+			checkTileStyleSet("skull")
+			checkTileStyleSet("blood")
+			checkTileStyleSet("egypt2")
+			checkTileStyleSet("iceberg")
+			checkTileStyleSet("ice2")
+
+		ctx.drawImage(tileImage, tileSrcX, tileSrcY, tileImage.ele.oneSheetW, tileImage.ele.oneSheetH, tile.w*j, tile.h*i, tile.w, tile.h)
+
+		}
+		}
+	}
+	//Coin
+	var coinImage = new Image();
+	coinImage.src = "./img/coin.png"
+
+	coinImage.ele = {}
+
+	coinImage.ele.w = 512
+	coinImage.ele.h = 256
+	coinImage.ele.columns = 8
+	coinImage.ele.rows = 4
+
+	coinImage.ele.oneSheetW = coinImage.ele.w/coinImage.ele.columns
+	coinImage.ele.oneSheetH = coinImage.ele.h/coinImage.ele.rows
+
+	coin = {}
+	coin.x = 50;
+	coin.y = 50;
+	coin.w = tile.w
+	coin.h = tile.h
+	coin.currentFrameC = 0;
+	coin.currentFrameR = 0;
+
+	function coinDraw(){
+		for(i = 0; i < stage[currentTileStage][currentStage].coin.length; i++){
+			if(stage[currentTileStage][currentStage].coin[i].status == 1){
+				ctx.drawImage(coinImage, coinImage.ele.oneSheetW * coin.currentFrameC, coinImage.ele.oneSheetH * coin.currentFrameR, coinImage.ele.oneSheetW, coinImage.ele.oneSheetH, stage[currentTileStage][currentStage].coin[i].x, stage[currentTileStage][currentStage].coin[i].y, coin.w, coin.h)
+			}
+		}
+
+				coin.currentFrameC += 1
+				if(coin.currentFrameC > 7){
+					coin.currentFrameC = 0;
+					coin.currentFrameR += 1;
+				}
+				if(coin.currentFrameR == 3 && coin.currentFrameC == 6){
+					coin.currentFrameC = 0
+					coin.currentFrameR = 0
+				}
+	}
+	
+	//coinproduce
+	function CoinProduce(x, y, status){
+		this.x = x
+		this.y = y
+		this.status = status
+	}
+	//Manㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	var manImage = new Image();
+	manImage.src = "./img/man.png"
+	
+	manImage.ele = {}
+
+	manImage.ele.w = 192
+	manImage.ele.h = 128
+	manImage.ele.columns = 8 
+	manImage.ele.rows = 4
+
+	manImage.ele.oneSheetW = manImage.ele.w/manImage.ele.columns
+	manImage.ele.oneSheetH = manImage.ele.h/manImage.ele.rows
+	//시트에서 방향이미지 rows 위치
+	manImage.ele.down = 0
+	manImage.ele.up = 1
+	manImage.ele.left = 2
+	manImage.ele.right = 3
+	
+	man = {
+		w : tile.w,
+		h : tile.h,
+		x : c.width/2 - 25,
+		y : c.height/2 - 25,
+
+		speed : 5,
+		swampSpeed : 2,
+		iceSpeed : 0.01,
+		iceSpeedDx : 0,
+		iceSpeedDy : 0,
+
+		direction : null,
+
+		currentFrame : {
+			cho : 0,
+			right : 0,
+			left : 0,
+			up : 0,
+			down : 0
+		},
+		fullTime : {
+			cho : 0,
+			right : 0,
+			left : 0,
+			up : 0,
+			down : 0
+		},
+		fullTimeNum : 3
+	}
+	function manDraw(){
+		//manObstacleCollisionDetection and add speed
+		function manTileCoDe(existenceNum, ERchange){
+			var collisionSide = null;
+			var forBreak = "no";
+			for(i = 0; i < stage[currentTileStage][currentStage].tile.length; i++){
+
+				if(forBreak == "yes"){break} //break key
+
+				for(j = 0; j < stage[currentTileStage][currentStage].tile.length; j++){
+					if(tile.set[stage[currentTileStage][currentStage].tile[i][j]].existence == existenceNum){
+						var manCenterX = man.x + man.w/2
+						var manCenterY = man.y + man.h/2
+						var tileCenterX = tile.w * j + tile.w/2
+						var tileCenterY = tile.h * i + tile.h/2
+						var VX = manCenterX - tileCenterX
+						var VY = manCenterY - tileCenterY
+						var overlapX = (man.w/2 + tile.w/2) - Math.abs(VX)
+						var overlapY = (man.h/2 + tile.h/2) - Math.abs(VY)
+						var ER = ERchange
+						if(Math.abs(VX) < man.w/2 + tile.w/2 - ER && Math.abs(VY) < man.h/2 + tile.h/2 - ER ){
+							//충돌발생
+							if(overlapX > overlapY){
+								if(VY > 0){
+									collisionSide = "bottom"
+								}
+								if(VY < 0){
+									collisionSide = "top"
+								}
+							}
+							if(overlapY > overlapX){
+								if(VX > 0){
+									collisionSide = "right"
+								}
+								if(VX < 0){
+									collisionSide = "left"
+								}
+							}
+							forBreak = "yes";
+							break;
+						} 
+					}
+				}
+		}
+
+			return collisionSide
+
+	}
+	//0 : 장애물 1 : 기본타일 2 : Swamp
+	//collisionSide null 이 아니다 = 충돌이 발생했다
+	if(keyboard.right == true){
+		man.direction = manImage.ele.right
+		man.currentFrame.cho = man.currentFrame.right
+		//0 tree
+		if(manTileCoDe(0, 10) != null){
+			if(manTileCoDe(0, 10) == "right"){man.x += man.speed*2}
+			if(manTileCoDe(0, 10) == "left"){man.x += -man.speed*2}
+			if(manTileCoDe(0, 10) == "top"){man.y += -man.speed*2}
+			if(manTileCoDe(0, 10) == "bottom"){man.y += man.speed*2}
+		} else if (manTileCoDe(0, 10) == null && manTileCoDe(2, 20) == null && manTileCoDe(3, 22) == null){
+			man.iceSpeedDx = 0
+			man.iceSpeedDy = 0
+			if(man.x < c.width - man.w){
+				man.x += man.speed;
+			}
+		}
+		//2 Swamp
+		if(manTileCoDe(2, 20) != null){
+			man.x += man.swampSpeed
+		}
+		//3 iceberg
+		if(manTileCoDe(3, 22) != null){
+			man.iceSpeedDx += 0.07
+			man.x += man.iceSpeedDx
+		}
+	}
+	if(keyboard.right == false){
+		if(manTileCoDe(3, 22) != null){
+			if(man.iceSpeedDx - 0.07 > 0){
+			man.iceSpeedDx -= 0.07
+			man.x += man.iceSpeedDx
+			}
+		}
+	}
+
+
+	if(keyboard.left == true){
+		man.direction = manImage.ele.left
+		man.currentFrame.cho = man.currentFrame.left
+		//0 tree
+		if(manTileCoDe(0, 10) != null){
+			if(manTileCoDe(0, 10) == "right"){man.x += man.speed*2}
+			if(manTileCoDe(0, 10) == "left"){man.x += -man.speed*2}
+			if(manTileCoDe(0, 10) == "top"){man.y += -man.speed*2}
+			if(manTileCoDe(0, 10) == "bottom"){man.y += man.speed*2}
+		} else if (manTileCoDe(0, 10) == null && manTileCoDe(2, 20) == null && manTileCoDe(3, 22) == null){
+			man.iceSpeedDx = 0
+			man.iceSpeedDy = 0
+			if(man.x > 0){
+				man.x += -man.speed;
+			}
+		}
+		//2 Swamp
+		if(manTileCoDe(2, 20) != null){
+			man.x += -man.swampSpeed
+		}
+		if(manTileCoDe(3, 22) != null){
+			man.iceSpeedDx -= 0.07
+			man.x += man.iceSpeedDx
+		}
+	}
+	if(keyboard.left == false){
+		if(manTileCoDe(3, 22) != null){
+			if(man.iceSpeedDx + 0.07 < 0){
+			man.iceSpeedDx += 0.07
+			man.x += man.iceSpeedDx
+			}
+		}
+	}
+	if(keyboard.up == true){
+		man.direction = manImage.ele.up
+		man.currentFrame.cho = man.currentFrame.up
+		//0 tree
+		if(manTileCoDe(0, 10) != null){
+			if(manTileCoDe(0, 10) == "right"){man.x += man.speed*2}
+			if(manTileCoDe(0, 10) == "left"){man.x += -man.speed*2}
+			if(manTileCoDe(0, 10) == "top"){man.y += -man.speed*2}
+			if(manTileCoDe(0, 10) == "bottom"){man.y += man.speed*2}
+		} else if (manTileCoDe(0, 10) == null && manTileCoDe(2, 20) == null && manTileCoDe(3, 22) == null){
+			man.iceSpeedDx = 0
+			man.iceSpeedDy = 0
+			if(man.y > 0){
+				man.y += -man.speed;
+			}
+		}
+		//2 swamp
+		if(manTileCoDe(2, 20) != null){
+			man.y += -man.swampSpeed
+		}
+		if(manTileCoDe(3, 22) != null){
+			man.iceSpeedDy -= 0.07
+			man.y += man.iceSpeedDy
+		}
+	}
+	if(keyboard.up == false){
+		if(manTileCoDe(3, 22) != null){
+			if(man.iceSpeedDy + 0.07 < 0){
+			man.iceSpeedDy += 0.07
+			man.y += man.iceSpeedDy
+			}
+		}
+	}
+	if(keyboard.down == true){
+		man.direction = manImage.ele.down
+		man.currentFrame.cho = man.currentFrame.down
+		//0 tree
+		if(manTileCoDe(0, 10) != null){
+			if(manTileCoDe(0, 10) == "right"){man.x += man.speed*2}
+			if(manTileCoDe(0, 10) == "left"){man.x += -man.speed*2}
+			if(manTileCoDe(0, 10) == "top"){man.y += -man.speed*2}
+			if(manTileCoDe(0, 10) == "bottom"){man.y += man.speed*2}
+		} else if (manTileCoDe(0, 10) == null && manTileCoDe(2, 20) == null && manTileCoDe(3, 22) == null){
+			man.iceSpeedDx = 0
+			man.iceSpeedDy = 0
+			if(man.y < c.height - man.h){
+				man.y += man.speed;
+			}
+		}
+		//2 swamp
+		if(manTileCoDe(2, 20) != null){
+			man.y += man.swampSpeed
+		}
+		if(manTileCoDe(3, 22) != null){
+			man.iceSpeedDy += 0.07
+			man.y += man.iceSpeedDy
+		}
+	}
+	if(keyboard.down == false){
+		if(manTileCoDe(3, 22) != null){
+			if(man.iceSpeedDy - 0.07 > 0){
+			man.iceSpeedDy -= 0.07
+			man.y += man.iceSpeedDy
+			}
+		}
+	}
+
+	ctx.drawImage(manImage, manImage.ele.oneSheetW * man.currentFrame.cho, man.direction * manImage.ele.oneSheetH, manImage.ele.oneSheetW, manImage.ele.oneSheetH, man.x, man.y, man.w, man.h)
+	//키입력이 있을때 해당방향키 프레임만 전환
+		function fullTimeCurrentFrameChange(input){
+			if(keyboard[input] == true){
+				man.fullTime[input] += 1;
+				if(man.fullTime[input] > man.fullTimeNum){
+					man.currentFrame[input] += 1;
+					man.fullTime[input] = 0;
+				}
+				if(man.currentFrame[input] > 7){
+					man.currentFrame[input] = 0;
+				}
+			}
+		}
+		fullTimeCurrentFrameChange("right")
+		fullTimeCurrentFrameChange("left")
+		fullTimeCurrentFrameChange("up")
+		fullTimeCurrentFrameChange("down")
+	}
+	//monsterㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	monster = {}
+
+	monster.refre ={
+		bug : {},
+		lizard : {},
+		bossGrassAxe : {},
+		zombie : {},
+		tailor : {},
+		bossSkullBoom : {}
+	}
+
+	//refre 스위치  : 스테이지 요건충족 -> 메이킹후 status = 1  -> 해당 스테이지에서 재생성 X 
+	monster.refre.bug.status = 0;
+	monster.refre.lizard.status = 0;
+	monster.refre.bossGrassAxe.status = 0;
+	monster.refre.zombie.status = 0;
+	monster.refre.tailor.status = 0;
+	monster.refre.bossSkullBoom.status = 0;
+
+	//monsterbugㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	monster.bugImage = {}
+
+	var monsterBugImage = new Image();
+	monsterBugImage.src = "./img/monsterBug.png"
+
+	monster.bugImage.ele = {}
+	monster.bugImage.ele.w = 580
+	monster.bugImage.ele.h = 184
+	monster.bugImage.ele.columns = 10
+	monster.bugImage.ele.rows = 4
+
+	monster.bugImage.ele.oneSheetW = monster.bugImage.ele.w / monster.bugImage.ele.columns
+	monster.bugImage.ele.oneSheetH = monster.bugImage.ele.h / monster.bugImage.ele.rows;
+	//시트에서의 bug 방향이미지 위치
+	monster.bugImage.ele.direction = null;
+	monster.bugImage.ele.down = 0
+	monster.bugImage.ele.left = 1
+	monster.bugImage.ele.up = 2
+	monster.bugImage.ele.right = 3
+
+	function monsterBugMaking(){
+
+		monster.refre.bug.status = 1;
+
+		monster.bugImage.fullTime = 0;
+		monster.bugImage.fullTimeNum = 10;
+		monster.bugImage.currentFrame = 0;
+
+		monster.bug = []
+		monster.bug[0] = {w : 50, h : 50, x : 50, y : 30, status : 1, speed : 3, direction : "RL"}
+		monster.bug[1] = {w : 50, h : 50, x : 100, y : 200, status : 1, speed : -3, direction : "RL"}
+		monster.bug[2] = {w : 100, h : 100, x : 400, y : 200, status : 1, speed : 3, direction : "UD"}
+		monster.bug[3] = {w : 50, h : 50, x : 70, y : 400, status : 1, speed : 3, direction : "UD"}
+
+	}
+	
+	function monsterBugDraw(){
+
+		for(i = 0; i < monster.bug.length; i++){
+
+			if(monster.bug[i].direction == "RL"){
+				if(monster.bug[i].speed > 0){monster.bugImage.ele.direction = 3}
+				if(monster.bug[i].speed < 0){monster.bugImage.ele.direction = 1}
+			}
+			if(monster.bug[i].direction == "UD"){
+				if(monster.bug[i].speed > 0){monster.bugImage.ele.direction = 2}
+				if(monster.bug[i].speed < 0){monster.bugImage.ele.direction = 0}
+			}
+
+			ctx.drawImage(monsterBugImage, monster.bugImage.currentFrame * monster.bugImage.ele.oneSheetW, monster.bugImage.ele.direction * monster.bugImage.ele.oneSheetH, monster.bugImage.ele.oneSheetW, monster.bugImage.ele.oneSheetH, monster.bug[i].x, monster.bug[i].y, monster.bug[i].w, monster.bug[i].h)
+
+			if(monster.bug[i].direction == "RL"){
+				monster.bug[i].x += monster.bug[i].speed;
+				if(monster.bug[i].x > c.width - monster.bug[i].w || monster.bug[i].x < 0){
+					monster.bug[i].speed = -monster.bug[i].speed
+				}
+			}
+			if(monster.bug[i].direction == "UD"){
+				monster.bug[i].y += -monster.bug[i].speed
+				if(monster.bug[i].y > c.height - monster.bug[i].h || monster.bug[i].y < 0){
+					monster.bug[i].speed = -monster.bug[i].speed
+				}
+			}
+
+				monster.bugImage.fullTime += 1
+
+			if(monster.bugImage.fullTime > monster.bugImage.fullTimeNum){
+				monster.bugImage.currentFrame += 1;
+				monster.bugImage.fullTime = 0;
+			}
+			if(monster.bugImage.currentFrame > 8){
+				monster.bugImage.currentFrame = 0
+			}
+		}
+	}
+
+	//monsterLizard  ///////////////////////////////////////레프리 왜 두개있냐 수정하자
+	monster.lizardImage = {}
+
+	var monsterlizardImage = new Image();
+	monsterlizardImage.src = "./img/monsterLizard.png"
+
+	monster.lizardImage.ele = {}
+	monster.lizardImage.ele.w = 480
+	monster.lizardImage.ele.h = 448
+	monster.lizardImage.ele.columns = 6
+	monster.lizardImage.ele.rows = 8
+
+	monster.lizardImage.ele.oneSheetW = monster.lizardImage.ele.w / monster.lizardImage.ele.columns
+	monster.lizardImage.ele.oneSheetH = monster.lizardImage.ele.h / monster.lizardImage.ele.rows;
+	//시트에서의 방향이미지 위치
+	monster.lizardImage.ele.direction = null;
+	monster.lizardImage.ele.down = 4
+	monster.lizardImage.ele.left = 2
+	monster.lizardImage.ele.up = 6
+	monster.lizardImage.ele.right = 0
+
+	function monsterLizardMaking(){
+
+		monster.refre.lizard.status = 1;
+
+		monster.lizardImage.fullTime = 0;
+		monster.lizardImage.fullTimeNum = 15;
+		monster.lizardImage.currentFrameColumns = 0
+		monster.lizardImage.currentFrameRows = 0 
+
+		monster.lizard = []
+		monster.lizard[0] = {w : 75, h : 75, x : 50, y : 30, status : 1, speed : 6, direction : "RL"}
+		monster.lizard[1] = {w : 75, h : 75, x : 100, y : 120, status : 1, speed : -6, direction : "RL"}
+		monster.lizard[2] = {w : 100, h : 100, x : 340, y : 300, status : 1, speed : -6, direction : "RL"}
+		//lizard UD 는 판정이 좋지않음
+
+	}
+
+	function monsterLizardDraw(){
+
+		for(i = 0; i < monster.lizard.length; i++){
+
+			if(monster.lizard[i].direction == "RL"){
+				if(monster.lizard[i].speed > 0){monster.lizardImage.ele.direction = 0}
+				if(monster.lizard[i].speed < 0){monster.lizardImage.ele.direction = 2}
+			}
+			if(monster.lizard[i].direction == "UD"){
+				if(monster.lizard[i].speed > 0){monster.lizardImage.ele.direction = 4}
+				if(monster.lizard[i].speed < 0){monster.lizardImage.ele.direction = 6}
+			}
+
+			ctx.drawImage(monsterlizardImage, monster.lizardImage.currentFrameColumns * monster.lizardImage.ele.oneSheetW, monster.lizardImage.ele.direction * monster.lizardImage.ele.oneSheetH + monster.lizardImage.ele.oneSheetH * monster.lizardImage.currentFrameRows, monster.lizardImage.ele.oneSheetW, monster.lizardImage.ele.oneSheetH, monster.lizard[i].x, monster.lizard[i].y, monster.lizard[i].w, monster.lizard[i].h)
+
+				if(monster.lizard[i].direction == "RL"){
+					if(monster.lizardImage.currentFrameRows == 0){
+						if(monster.lizard[i].speed > 0){monster.lizard[i].speed = 6}
+						if(monster.lizard[i].speed < 0){monster.lizard[i].speed = -6}
+					} else {
+					if(monster.lizard[i].speed > 0){monster.lizard[i].speed = 1}
+					if(monster.lizard[i].speed < 0){monster.lizard[i].speed = -1}
+					}
+
+					monster.lizard[i].x += monster.lizard[i].speed;
+					if(monster.lizard[i].x > c.width - monster.lizard[i].w || monster.lizard[i].x < 0){
+						monster.lizard[i].speed = -monster.lizard[i].speed
+					}
+				}
+				if(monster.lizard[i].direction == "UD"){
+					if(monster.lizardImage.currentFrameRows == 0){
+						if(monster.lizard[i].speed > 0){monster.lizard[i].speed = 6}
+						if(monster.lizard[i].speed < 0){monster.lizard[i].speed = -6}
+					} else {
+					if(monster.lizard[i].speed > 0){monster.lizard[i].speed = 1}
+					if(monster.lizard[i].speed < 0){monster.lizard[i].speed = -1}
+					}
+					monster.lizard[i].y += monster.lizard[i].speed
+					if(monster.lizard[i].y > c.height - monster.lizard[i].h || monster.lizard[i].y < 0){
+						monster.lizard[i].speed = -monster.lizard[i].speed
+					}
+				}	
+			
+			monster.lizardImage.fullTime += 1
+			if(monster.lizardImage.fullTime > monster.lizardImage.fullTimeNum){
+				monster.lizardImage.currentFrameColumns += 1;
+				monster.lizardImage.fullTime = 0;
+			}
+			if(monster.lizardImage.currentFrameColumns > 5){
+				monster.lizardImage.currentFrameRows += 1
+				monster.lizardImage.currentFrameColumns = 0
+			}
+
+			if(monster.lizardImage.currentFrameColumns == 5 && monster.lizardImage.currentFrameRows == 1){
+				monster.lizardImage.currentFrameColumns = 0;
+				monster.lizardImage.currentFrameRows = 0;
+				monster.lizardImage.fullTime = 0;
+			}
+		}
+	}
+
+
+	//monster tailorㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	monster.tailorImage = {}
+
+	var monsterTailorImage = new Image();
+	monsterTailorImage.src = "./img/tailor.png"
+
+	monster.tailorImage.ele = {}
+	monster.tailorImage.ele.w = 240
+	monster.tailorImage.ele.h = 320
+	monster.tailorImage.ele.columns = 3
+	monster.tailorImage.ele.rows = 4
+
+	monster.tailorImage.ele.oneSheetW = monster.tailorImage.ele.w / monster.tailorImage.ele.columns
+	monster.tailorImage.ele.oneSheetH = monster.tailorImage.ele.h / monster.tailorImage.ele.rows;
+	//시트에서의 tailor 방향이미지 위치
+	monster.tailorImage.ele.direction = null;
+	monster.tailorImage.ele.down = 0
+	monster.tailorImage.ele.left = 1
+	monster.tailorImage.ele.up = 3
+	monster.tailorImage.ele.right = 2
+
+	function monsterTailorMaking(){
+
+		monster.refre.tailor.status = 1;
+
+		monster.tailorImage.fullTime = 0;
+		monster.tailorImage.fullTimeNum = 4;
+		monster.tailorImage.currentFrame = 0;
+
+		if(stage[currentTileStage][currentStage].monster[3] == "tailorType1"){
+
+		monster.tailor = []
+		//large rect
+		monster.tailor[0] = {x : 50, y : 50, w : 50, h : 50, speed : 3.5, s : 350, sSum : 0, direction : "RL"}
+		monster.tailor[1] = {x : 400, y : 400, w : 50, h : 50, speed : -3.5, s : 350, sSum : 0, direction : "RL"}
+		monster.tailor[2] = {x : 150, y : 150, w : 50, h : 50, speed : 3.5, s : 150, sSum : 0, direction : "RL"}
+		monster.tailor[3] = {x : 300, y : 300, w : 50, h : 50, speed : -3.5, s : 150, sSum : 0, direction : "RL"}
+		}
+
+		if(stage[currentTileStage][currentStage].monster[4] == "tailorType2"){
+
+		monster.tailor = []
+		//large rect
+		monster.tailor[0] = {x : 0, y : 0, w : 50, h : 50, speed : 2, s : 450, sSum : 0, direction : "RL"}
+		monster.tailor[1] = {x : 450, y : 450, w : 50, h : 50, speed : -2, s : 450, sSum : 0, direction : "RL"}
+		monster.tailor[2] = {x : 450, y : 0, w : 50, h : 50, speed : 2, s : 450, sSum : 0, direction : "UD"}
+		monster.tailor[3] = {x : 0, y : 450, w : 50, h : 50, speed : -2, s : 450, sSum : 0, direction : "UD"}
+		//small rect
+		monster.tailor[4] = {x : 125, y : 0, w : 50, h : 50, speed : 2, s : 200, sSum : 125, direction : "RL"}
+		monster.tailor[5] = {x : 375, y : 0, w : 50, h : 50, speed : 2, s : 200, sSum : 125, direction : "RL"}
+		monster.tailor[6] = {x : 325, y : 450, w : 50, h : 50, speed : -2, s : 200, sSum : 125, direction : "RL"}
+		monster.tailor[7] = {x : 75, y : 450, w : 50, h : 50, speed : -2, s : 200, sSum : 125, direction : "RL"}
+		//medium rect
+		monster.tailor[8] = {x : 100, y : 100, w : 50, h : 50, speed : 2, s : 250, sSum : 0, direction : "RL"}
+		monster.tailor[9] = {x : 350, y : 350, w : 50, h : 50, speed : -2, s : 250, sSum : 0, direction : "RL"}
+		
+		}
+
+		
+
+	}
+
+	///spee 양수면 증가  부터 시작 rl이면 x ud 면 y
+	//speed 음수면 감소 부터 시작
+	
+
+	rad = 0
+	function monsterTailorDraw(){
+
+		for(i = 0; i < monster.tailor.length; i++){
+
+			if(monster.tailor[i].direction == "RL"){
+				
+				if(monster.tailor[i].speed > 0){monster.tailorImage.ele.direction = 2}//right
+				if(monster.tailor[i].speed < 0){monster.tailorImage.ele.direction = 1}//left
+
+			}
+
+			if(monster.tailor[i].direction == "UD"){
+
+				if(monster.tailor[i].speed > 0){monster.tailorImage.ele.direction = 0}//down
+				if(monster.tailor[i].speed < 0){monster.tailorImage.ele.direction = 3}//up
+
+			}
+
+			ctx.drawImage(monsterTailorImage, monster.tailorImage.currentFrame * monster.tailorImage.ele.oneSheetW, monster.tailorImage.ele.direction * monster.tailorImage.ele.oneSheetH, monster.tailorImage.ele.oneSheetW, monster.tailorImage.ele.oneSheetH, monster.tailor[i].x, monster.tailor[i].y, monster.tailor[i].w, monster.tailor[i].h)
+
+			if(monster.tailor[i].direction == "RL"){
+				monster.tailor[i].x += monster.tailor[i].speed
+			}
+
+			if(monster.tailor[i].direction == "UD"){
+				monster.tailor[i].y += monster.tailor[i].speed
+			}
+
+			monster.tailor[i].sSum += Math.abs(monster.tailor[i].speed)
+
+			if(monster.tailor[i].sSum > monster.tailor[i].s){
+
+				monster.tailor[i].sSum = 0
+
+				if(monster.tailor[i].direction == "RL"){
+					monster.tailor[i].direction = "UD"
+				} else if (monster.tailor[i].direction == "UD"){
+					monster.tailor[i].direction = "RL"
+					monster.tailor[i].speed = -monster.tailor[i].speed
+				}
+				
+			}
+		}
+
+		monster.tailorImage.fullTime += 1
+
+		if(monster.tailorImage.fullTime > monster.tailorImage.fullTimeNum){
+			monster.tailorImage.currentFrame += 1
+			monster.tailorImage.fullTime = 0
+		}
+
+		if(monster.tailorImage.currentFrame == 3){
+			monster.tailorImage.currentFrame = 0;
+		}
+	}
+
+	//monster zombie
+	monster.zombieImage = {}
+
+	var monsterZombieImage = new Image();
+	monsterZombieImage.src = "./img/monsterZombie.png"
+
+	monster.zombieImage.ele = {}
+	monster.zombieImage.ele.w = 448
+	monster.zombieImage.ele.h = 512
+	monster.zombieImage.ele.columns = 7
+	monster.zombieImage.ele.rows = 8
+
+	monster.zombieImage.ele.oneSheetW = monster.zombieImage.ele.w / monster.zombieImage.ele.columns
+	monster.zombieImage.ele.oneSheetH = monster.zombieImage.ele.h / monster.zombieImage.ele.rows;
+	//시트에서의 zombie 방향이미지 위치
+	monster.zombieImage.ele.direction = null;
+
+	monster.zombieImage.ele.down = 0
+	monster.zombieImage.ele.left = 2
+	monster.zombieImage.ele.up = 3
+	monster.zombieImage.ele.right = 1
+
+	function monsterZombieMaking(){
+
+		monster.refre.zombie.status = 1;
+
+		monster.zombieImage.fullTime = 0;
+		monster.zombieImage.fullTimeNum = 15;
+		monster.zombieImage.currentFrameColumns = 0
+		monster.zombieImage.currentFrameRows = 0 
+
+		if(stage[currentTileStage][currentStage].monster[5] == "zombieType1"){
+
+			monster.zombie = []
+			monster.zombie[0] = {w : 75, h : 75, x : 1, y : 0, speed : 2}
+
+		}
+
+		if(stage[currentTileStage][currentStage].monster[6] == "zombieType2"){
+
+			monster.zombie = []
+			monster.zombie[0] = {w : 75, h : 75, x : 1, y : 0, speed : 2}
+			monster.zombie[1] = {w : 75, h : 75, x : 421, y : 0, speed : 2}
+			monster.zombie[2] = {w : 75, h : 75, x : 1, y : 420, speed : 2}
+			monster.zombie[3] = {w : 75, h : 75, x : 421, y : 420, speed : 2}
+
+		}
+
+		
+
+	}
+
+	function monsterZombieDraw(){
+
+		for(i = 0; i < monster.zombie.length; i++){
+
+			var VX = man.x - monster.zombie[i].x
+			var VY = man.y - monster.zombie[i].y
+		
+			monster.zombie[i].slope = VY / VX  //VX 가 0 인경우 오류 날수있어   (vx vy 0 인경우 생각해주자)
+			
+			var rad = Math.atan(monster.zombie[i].slope)
+
+			if(monster.zombie[i].slope >= 0){
+
+				if(man.x > monster.zombie[i].x && man.y > monster.zombie[i].y){			
+					dx = monster.zombie[i].speed * Math.cos(rad)
+					dy = monster.zombie[i].speed * Math.sin(rad)
+				}
+				if(man.x < monster.zombie[i].x && man.y < monster.zombie[i].y){
+					dx = -monster.zombie[i].speed * Math.cos(rad)
+					dy = -monster.zombie[i].speed * Math.sin(rad)
+				}
+			}
+			if(monster.zombie[i].slope < 0){
+
+				if(man.x > monster.zombie[i].x && man.y < monster.zombie[i].y){
+					dx = monster.zombie[i].speed * Math.cos(rad)
+					dy = monster.zombie[i].speed * Math.sin(rad)
+				}
+				if(man.x < monster.zombie[i].x && man.y > monster.zombie[i].y){
+					dx = -monster.zombie[i].speed * Math.cos(rad)
+					dy = -monster.zombie[i].speed * Math.sin(rad)
+				}
+			}
+				
+				monster.zombie[i].x += dx
+				monster.zombie[i].y += dy
+
+			if(Math.abs(dx) >= Math.abs(dy)){
+				if(dx > 0){monster.zombieImage.ele.direction = 1}//right
+				if(dx < 0){monster.zombieImage.ele.direction = 2}//left
+			}
+
+			if(Math.abs(dx) < Math.abs(dy)){
+				if(dy > 0){monster.zombieImage.ele.direction = 0}//down
+				if(dy < 0){monster.zombieImage.ele.direction = 3}//up
+			}
+
+
+			ctx.drawImage(monsterZombieImage, monster.zombieImage.currentFrameColumns * monster.zombieImage.ele.oneSheetW, monster.zombieImage.ele.oneSheetH * monster.zombieImage.ele.direction, monster.zombieImage.ele.oneSheetW, monster.zombieImage.ele.oneSheetH, monster.zombie[i].x, monster.zombie[i].y, monster.zombie[i].w, monster.zombie[i].h)
+			
+		}
+
+		monster.zombieImage.fullTime += 1
+		if(monster.zombieImage.fullTime > 4){
+			monster.zombieImage.currentFrameColumns += 1;
+			monster.zombieImage.fullTime = 0;
+		}
+		if(monster.zombieImage.currentFrameColumns == monster.zombieImage.ele.columns){
+			monster.zombieImage.currentFrameColumns = 0
+		}
+
+	}
+
+	//monsterBossGrassAxe
+
+	monster.bossGrassAxeImage = {}
+
+	var monsterBossGrassAxeImage = new Image();
+	monsterBossGrassAxeImage.src = "./img/axe.png"
+
+	monster.bossGrassAxeImage.ele = {}
+	monster.bossGrassAxeImage.ele.w = 960
+	monster.bossGrassAxeImage.ele.h = 960
+	monster.bossGrassAxeImage.ele.columns = 6
+	monster.bossGrassAxeImage.ele.rows = 6
+
+	monster.bossGrassAxeImage.ele.oneSheetW = monster.bossGrassAxeImage.ele.w / monster.bossGrassAxeImage.ele.columns
+	monster.bossGrassAxeImage.ele.oneSheetH = monster.bossGrassAxeImage.ele.h / monster.bossGrassAxeImage.ele.rows;
+	
+	monsterBossGrassAxeMakingSwitch = 0 // 최초 한번 정의(함수 정의시에)
+	function monsterBossGrassAxeMaking(){
+
+		monster.refre.bossGrassAxe.status = 1;
+
+		monster.bossGrassAxeImage.currentFrameColumns = 0
+		monster.bossGrassAxeImage.currentFrameRows = 0 
+
+		//making axe style at launch time
+
+		if(monsterBossGrassAxeMakingSwitch == 0){
+		monster.bossGrassAxe = []
+		monster.bossGrassAxe[0] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1, dy : null, slope : 6}
+		monster.bossGrassAxe[1] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2, dy : null, slope : 6}
+		monster.bossGrassAxe[2] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.5, dy : null, slope : 6}
+		monster.bossGrassAxe[3] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3, dy : null, slope : 6}
+		monster.bossGrassAxe[4] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4, dy : null, slope : 6}
+		monster.bossGrassAxe[5] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.5, dy : null, slope : 6}
+		monster.bossGrassAxe[6] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5, dy : null, slope : 6}
+		monster.bossGrassAxe[7] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.6, dy : null, slope : 6}
+		monster.bossGrassAxe[8] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1.5, dy : null, slope : 6}
+		}
+		if(monsterBossGrassAxeMakingSwitch == 1){
+		monster.bossGrassAxe = []
+		monster.bossGrassAxe[0] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.7, dy : null, slope : 6}
+		monster.bossGrassAxe[1] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1.4, dy : null, slope : 6}
+		monster.bossGrassAxe[2] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.1, dy : null, slope : 6}
+		monster.bossGrassAxe[3] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.8, dy : null, slope : 6}
+		monster.bossGrassAxe[4] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3.5, dy : null, slope : 6}
+		monster.bossGrassAxe[5] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.2, dy : null, slope : 6}
+		monster.bossGrassAxe[6] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.9, dy : null, slope : 6}
+		monster.bossGrassAxe[7] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.6, dy : null, slope : 6}
+		monster.bossGrassAxe[8] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1.1, dy : null, slope : 6}
+		}
+		if(monsterBossGrassAxeMakingSwitch == 2){
+		monster.bossGrassAxe = []
+		monster.bossGrassAxe[0] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.5, dy : null, slope : 6}
+		monster.bossGrassAxe[1] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.7, dy : null, slope : 6}
+		monster.bossGrassAxe[2] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.9, dy : null, slope : 6}
+		monster.bossGrassAxe[3] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.1, dy : null, slope : 6}
+		monster.bossGrassAxe[4] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.3, dy : null, slope : 6}
+		monster.bossGrassAxe[5] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.5, dy : null, slope : 6}
+		monster.bossGrassAxe[6] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.7, dy : null, slope : 6}
+		monster.bossGrassAxe[7] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.9, dy : null, slope : 6}
+		monster.bossGrassAxe[8] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.3, dy : null, slope : 6}
+		}
+		if(monsterBossGrassAxeMakingSwitch == 3){
+		monster.bossGrassAxe = []
+		monster.bossGrassAxe[0] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.2, dy : null, slope : 6}
+		monster.bossGrassAxe[1] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.5, dy : null, slope : 6}
+		monster.bossGrassAxe[2] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 2.8, dy : null, slope : 6}
+		monster.bossGrassAxe[3] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3.1, dy : null, slope : 6}
+		monster.bossGrassAxe[4] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3.4, dy : null, slope : 6}
+		monster.bossGrassAxe[5] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3.7, dy : null, slope : 6}
+		monster.bossGrassAxe[6] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.0, dy : null, slope : 6}
+		monster.bossGrassAxe[7] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 4.3, dy : null, slope : 6}
+		monster.bossGrassAxe[8] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 5.5, dy : null, slope : 6}
+		}
+		if(monsterBossGrassAxeMakingSwitch == 4){
+		monster.bossGrassAxe = []
+		monster.bossGrassAxe[0] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.7, dy : null, slope : 6}
+		monster.bossGrassAxe[1] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.9, dy : null, slope : 6}
+		monster.bossGrassAxe[2] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1.2, dy : null, slope : 6}
+		monster.bossGrassAxe[3] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 1.5, dy : null, slope : 6}
+		monster.bossGrassAxe[4] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0, dy : null, slope : 6}
+		monster.bossGrassAxe[5] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.2, dy : null, slope : 6}
+		monster.bossGrassAxe[6] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.4, dy : null, slope : 6}
+		monster.bossGrassAxe[7] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 0.5, dy : null, slope : 6}
+		monster.bossGrassAxe[8] = {w : 50, h : 50, x : c.width - 40, y : 0 + 30, status : 1, dx : 3.5, dy : null, slope : 6}
+		}
+	}
+
+	function monsterBossGrassAxeCheckReMaking(){
+		var sum = 0;
+		for(i = 0; i < monster.bossGrassAxe.length; i++){
+		sum += monster.bossGrassAxe[i].status
+		}
+
+		if(sum == 0){
+			monsterBossGrassAxeMakingSwitch += 1;
+			if(monsterBossGrassAxeMakingSwitch == 5){
+				monsterBossGrassAxeMakingSwitch = 0;
+			}
+			monsterBossGrassAxeMaking()
+		}
+	}
+
+	function monsterBossGrassAxeDraw(){
+
+		for(i = 0; i < monster.bossGrassAxe.length; i++){
+			ctx.drawImage(monsterBossGrassAxeImage, monster.bossGrassAxeImage.ele.oneSheetW * monster.bossGrassAxeImage.currentFrameColumns, monster.bossGrassAxeImage.ele.oneSheetH * monster.bossGrassAxeImage.currentFrameRows, monster.bossGrassAxeImage.ele.oneSheetW, monster.bossGrassAxeImage.ele.oneSheetH, monster.bossGrassAxe[i].x,  monster.bossGrassAxe[i].y, monster.bossGrassAxe[i].w, monster.bossGrassAxe[i].h)
+		
+			monster.bossGrassAxe[i].dy = Math.sqrt(Math.pow(monster.bossGrassAxe[i].slope, 2) - Math.pow(monster.bossGrassAxe[i].dx, 2))
+
+			monster.bossGrassAxe[i].x -= monster.bossGrassAxe[i].dx
+			monster.bossGrassAxe[i].y += monster.bossGrassAxe[i].dy
+
+			if(monster.bossGrassAxe[i].x < 0 - monster.bossGrassAxe[i].w || monster.bossGrassAxe[i].y > c.height){
+				monster.bossGrassAxe[i].status = 0
+			}
+		}
+
+		monster.bossGrassAxeImage.currentFrameColumns += 1;
+			
+		if(monster.bossGrassAxeImage.currentFrameColumns == monster.bossGrassAxeImage.ele.columns){
+				monster.bossGrassAxeImage.currentFrameColumns = 0;
+				monster.bossGrassAxeImage.currentFrameRows += 1;
+				if(monster.bossGrassAxeImage.currentFrameRows == monster.bossGrassAxeImage.ele.rows){
+					monster.bossGrassAxeImage.currentFrameRows = 0;
+				}
+		}
+	}
+
+	//boss image motion draw
+	//boss Image Draw
+
+	//boss grass
+	var bossGrassImage = new Image()
+		bossGrassImage.src = "./img/grassBossJump.png"
+
+		bossGrassImage.ele = {}
+		bossGrassImage.ele.w = 1550
+		bossGrassImage.ele.h = 770
+
+		bossGrassImage.ele.columns = 5
+		bossGrassImage.ele.rows = 2
+
+		bossGrassImage.ele.oneSheetW = bossGrassImage.ele.w / bossGrassImage.ele.columns
+		bossGrassImage.ele.oneSheetH = bossGrassImage.ele.h / bossGrassImage.ele.rows
+
+		bossGrassImage.ele.currentFrameColumns = 0;
+		bossGrassImage.ele.currentFrameRows = 0;
+
+		bossGrassImage.ele.fullTime = 0
+		bossGrassImage.ele.fullTimeNum = 7
+	
+		bossGrass = {}
+		bossGrass.x = 350
+		bossGrass.y = 0
+		bossGrass.w = 150
+		bossGrass.h = 200
+
+		bossGrass.elapsedTime = 0;
+		bossGrass.winSwitch = 0
+
+		
+		function bossGrassdraw(){
+				if(bossGrass.elapsedTime < 200){
+				//서있는 장면 draw
+				ctx.drawImage(bossGrassImage, bossGrassImage.ele.oneSheetW * 2,  bossGrassImage.ele.oneSheetH * 1, bossGrassImage.ele.oneSheetW, bossGrassImage.ele.oneSheetH, bossGrass.x, bossGrass.y, bossGrass.w, bossGrass.h)
+					bossGrass.elapsedTime += 1;
+				}
+
+				if(bossGrass.elapsedTime >= 200){
+					ctx.drawImage(bossGrassImage, bossGrassImage.ele.currentFrameColumns * bossGrassImage.ele.oneSheetW,  bossGrassImage.ele.currentFrameRows * bossGrassImage.ele.oneSheetH, bossGrassImage.ele.oneSheetW, bossGrassImage.ele.oneSheetH, bossGrass.x, bossGrass.y, bossGrass.w, bossGrass.h)
+					
+					bossGrassImage.ele.fullTime += 1;
+
+					if(bossGrassImage.ele.fullTime > bossGrassImage.ele.fullTimeNum){
+						bossGrassImage.ele.currentFrameColumns += 1;
+						bossGrassImage.ele.fullTime = 0;
+					}
+					if(bossGrassImage.ele.currentFrameColumns == bossGrassImage.ele.columns){
+						bossGrassImage.ele.currentFrameColumns = 0;
+						bossGrassImage.ele.currentFrameRows += 1;
+					}
+
+					if(bossGrassImage.ele.currentFrameColumns == 3 && bossGrassImage.ele.currentFrameRows == 1){
+						bossGrassImage.ele.currentFrameColumns = 0;
+						bossGrassImage.ele.currentFrameRows = 0;
+					}
+				}	
+		}
+		//boss Grass Hp Bar Draw
+		var bossGrassHpBarImage = new Image()
+		bossGrassHpBarImage.src = "./img/monsterBossGrassLeaf.png"
+
+		bossGrassHpBarImage.ele = {}
+		bossGrassHpBarImage.ele.w = 2700
+		bossGrassHpBarImage.ele.h = 440
+
+		bossGrassHpBarImage.ele.columns = 15
+		bossGrassHpBarImage.ele.rows = 5
+
+		bossGrassHpBarImage.ele.oneSheetW = bossGrassHpBarImage.ele.w / bossGrassHpBarImage.ele.columns
+		bossGrassHpBarImage.ele.oneSheetH = bossGrassHpBarImage.ele.h / bossGrassHpBarImage.ele.rows
+
+		bossGrassHpBarImage.ele.currentFrameColumns = 0;
+		bossGrassHpBarImage.ele.currentFrameRows = 0;
+
+		bossGrass.hp = {}
+		bossGrass.hp.num = 5;
+		bossGrass.hp.w = 40
+		bossGrass.hp.h = 40;
+		bossGrass.hp.distance = 55;
+
+		bossGrass.hp.elapsedTime = 0;
+		bossGrass.hp.elapsedTimeResetNum = 5;
+
+		function bossGrassHpBarDraw(){
+			
+			for(i = 0; i < bossGrass.hp.num; i++){
+
+			ctx.drawImage(bossGrassHpBarImage, bossGrassHpBarImage.ele.currentFrameColumns * bossGrassHpBarImage.ele.oneSheetW,  bossGrassHpBarImage.ele.currentFrameRows * bossGrassHpBarImage.ele.oneSheetH, bossGrassHpBarImage.ele.oneSheetW, bossGrassHpBarImage.ele.oneSheetH, c.width - 30 - (i * bossGrass.hp.distance), 0, bossGrass.hp.w, bossGrass.hp.h)
+			}
+			
+			bossGrassHpBarImage.ele.currentFrameColumns += 1;
+	
+			
+			if(bossGrassHpBarImage.ele.currentFrameColumns == bossGrassHpBarImage.ele.columns){
+				bossGrassHpBarImage.ele.currentFrameColumns = 0;
+				bossGrassHpBarImage.ele.currentFrameRows += 1;
+			}
+
+			if(bossGrassHpBarImage.ele.currentFrameColumns == 14 && bossGrassHpBarImage.ele.currentFrameRows == 4){
+				bossGrassHpBarImage.ele.currentFrameColumns = 0;
+				bossGrassHpBarImage.ele.currentFrameRows = 0;
+
+				bossGrass.hp.elapsedTime += 1;	
+			}
+			if(bossGrass.hp.elapsedTime > bossGrass.hp.elapsedTimeResetNum && bossGrass.hp.num != 0){
+				bossGrass.hp.num -= 1
+				bossGrass.hp.elapsedTime = 0;
+			}
+			if(bossGrass.hp.num == 0){
+				grassBossDieAudio.play()
+			}
+		}	
+		//bossGrassDieImage
+		var bossGrassDieImage = new Image()
+		bossGrassDieImage.src = "./img/grassBossDie.png"
+
+		bossGrassDieImage.ele = {}
+		bossGrassDieImage.ele.w = 1550
+		bossGrassDieImage.ele.h = 770
+
+		bossGrassDieImage.ele.columns = 5
+		bossGrassDieImage.ele.rows = 2
+
+		bossGrassDieImage.ele.oneSheetW = bossGrassDieImage.ele.w / bossGrassDieImage.ele.columns
+		bossGrassDieImage.ele.oneSheetH = bossGrassDieImage.ele.h / bossGrassDieImage.ele.rows
+
+		bossGrassDieImage.ele.currentFrameColumns = 0;
+		bossGrassDieImage.ele.currentFrameRows = 0;
+
+		bossGrassDieImage.ele.fullTime = 0;
+		bossGrassDieImage.ele.fullTimeNum = 7;
+
+		bossGrassDieImage.ele.elapsedTime = 0;
+
+		bossGrassDieImage.ele.fixSwitch = 0;
+
+		function bossGrassDieDraw(){
+			if(bossGrassDieImage.ele.fixSwitch == 0){
+				ctx.drawImage(bossGrassDieImage, bossGrassDieImage.ele.oneSheetW * bossGrassDieImage.ele.currentFrameColumns, bossGrassDieImage.ele.oneSheetH * bossGrassDieImage.ele.currentFrameRows, bossGrassDieImage.ele.oneSheetW, bossGrassDieImage.ele.oneSheetH, bossGrass.x, bossGrass.y, bossGrass.w, bossGrass.h)
+				
+					bossGrassDieImage.ele.fullTime += 1;
+				
+				if(bossGrassDieImage.ele.fullTime > bossGrassDieImage.ele.fullTimeNum){
+					bossGrassDieImage.ele.currentFrameColumns += 1;
+					bossGrassDieImage.ele.fullTime = 0;
+				}
+				if(bossGrassDieImage.ele.currentFrameColumns == bossGrassDieImage.ele.columns){
+					bossGrassDieImage.ele.currentFrameRows += 1;
+					bossGrassDieImage.ele.currentFrameColumns = 0
+				}
+			}
+			if(bossGrassDieImage.ele.currentFrameColumns == 4 && bossGrassDieImage.ele.currentFrameRows == 1){
+
+				bossGrassDieImage.ele.fixSwitch = 1;
+
+			ctx.drawImage(bossGrassDieImage, bossGrassDieImage.ele.oneSheetW * 3, bossGrassDieImage.ele.oneSheetH * 1, bossGrassDieImage.ele.oneSheetW, bossGrassDieImage.ele.oneSheetH, bossGrass.x, bossGrass.y, bossGrass.w, bossGrass.h)
+
+				bossGrassDieImage.ele.elapsedTime += 1
+
+			}
+		}
+
+		//desertBossSkullDraw
+
+		var bossSkullImage = new Image();
+		bossSkullImage.src = "./img/desertBoss.png"
+
+		bossSkullImage.ele = {}
+		bossSkullImage.ele.w = 500
+		bossSkullImage.ele.h = 256
+
+		bossSkullImage.ele.columns = 10
+		bossSkullImage.ele.rows = 4
+
+		bossSkullImage.ele.oneSheetW = bossSkullImage.ele.w / bossSkullImage.ele.columns
+		bossSkullImage.ele.oneSheetH = bossSkullImage.ele.h / bossSkullImage.ele.rows
+
+		bossSkullImage.ele.currentFrameColumns = 0;
+		bossSkullImage.ele.currentFrameRows = 0;
+
+		bossSkullImage.ele.fullTime = 0
+		bossSkullImage.ele.fullTimeNum = 7
+	
+		bossSkull = {}
+		bossSkull.x = 50
+		bossSkull.y = -50
+		bossSkull.w = 400
+		bossSkull.h = 300
+
+		bossSkull.elapsedTime = 0;
+		bossSkull.winSwitch = 0
+
+		function bossSkullDraw(){
+
+			bossSkull.elapsedTime += 1;
+
+			if(bossSkull.elapsedTime == 50){
+
+				creepyAudio.currentTime = 0
+				creepyAudio.play()
+
+			}
+
+			if(bossSkull.elapsedTime < 150){
+
+				ctx.drawImage(bossSkullImage, 0, 0, bossSkullImage.ele.oneSheetW, bossSkullImage.ele.oneSheetH, bossSkull.x, bossSkull.y, bossSkull.w, bossSkull.h)
+
+			}
+
+			
+
+			if(bossSkull.elapsedTime >= 150){
+				ctx.drawImage(bossSkullImage, bossSkullImage.ele.oneSheetW * bossSkullImage.ele.currentFrameColumns, 0, bossSkullImage.ele.oneSheetW, bossSkullImage.ele.oneSheetH, bossSkull.x, bossSkull.y, bossSkull.w, bossSkull.h)
+
+				bossSkullImage.ele.fullTime += 1;
+				if(bossSkullImage.ele.fullTime > bossSkullImage.ele.fullTimeNum){
+					bossSkullImage.ele.currentFrameColumns += 1
+					bossSkullImage.ele.fullTime = 0;
+				}
+
+				if(bossSkullImage.ele.currentFrameColumns == 9){
+					bossSkullImage.ele.currentFrameColumns = 0;
+				}
+			}
+
+		}
+
+		var bossSkullBoomImage = new Image();
+		bossSkullBoomImage.src = "./img/explosion.2.png"
+
+		bossSkullBoomImage.ele = {}
+		bossSkullBoomImage.ele.w = 480
+		bossSkullBoomImage.ele.h = 288
+
+		bossSkullBoomImage.ele.columns = 5
+		bossSkullBoomImage.ele.rows = 3
+
+		bossSkullBoomImage.ele.oneSheetW = bossSkullBoomImage.ele.w / bossSkullBoomImage.ele.columns
+		bossSkullBoomImage.ele.oneSheetH = bossSkullBoomImage.ele.h / bossSkullBoomImage.ele.rows
+
+		bossSkullBoomImage.ele.currentFrameColumns = 0;
+		bossSkullBoomImage.ele.currentFrameRows = 0;
+
+		bossSkullBoomImage.ele.fullTime = 0
+		bossSkullBoomImage.ele.fullTimeNum = 3
+		
+		bossSkullBoom = {}
+
+		bossSkullBoom.elapsedTime = 0;
+		bossSkullBoom.winSwitch = 0
+
+		function monsterbossSkullBoomMaking(){
+
+			monster.refre.bossSkullBoom.status = 1;
+
+			bossSkullBoomImage.ele.currentFrameColumns = 0
+			bossSkullBoomImage.ele.currentFrameRows = 0 
+
+			monster.bossSkullBoom = [[],[],[],[],[],[],[]]
+
+			for(i = 0; i < 7; i++){
+
+				for(j = 0; j < 10; j++){
+
+					monster.bossSkullBoom[i][j] = {x : j * 50, y : 150 + i * 50, w : 50, h : 50, status : 0, fullTime : 0, fullTimeNum : 3, currentFrameColumns : 0, currentFrameRows : 0}
+
+				}
+			}	
+		}
+
+		function bossSkullBoomDraw(){
+
+			for(i = 0; i < monster.bossSkullBoom.length; i++){
+
+				for(j = 0; j < monster.bossSkullBoom[i].length; j++){
+
+					if(monster.bossSkullBoom[i][j].status == 1){
+
+					ctx.drawImage(bossSkullBoomImage, bossSkullBoomImage.ele.oneSheetW * monster.bossSkullBoom[i][j].currentFrameColumns, bossSkullBoomImage.ele.oneSheetH * monster.bossSkullBoom[i][j].currentFrameRows, bossSkullBoomImage.ele.oneSheetW, bossSkullBoomImage.ele.oneSheetH, monster.bossSkullBoom[i][j].x, monster.bossSkullBoom[i][j].y, monster.bossSkullBoom[i][j].w, monster.bossSkullBoom[i][j].h)
+
+						monster.bossSkullBoom[i][j].fullTime += 1;
+						if(monster.bossSkullBoom[i][j].fullTime > monster.bossSkullBoom[i][j].fullTimeNum){
+						monster.bossSkullBoom[i][j].fullTime = 0;
+						monster.bossSkullBoom[i][j].currentFrameColumns += 1;	
+						}
+
+						if(monster.bossSkullBoom[i][j].currentFrameColumns == bossSkullBoomImage.ele.columns){
+							monster.bossSkullBoom[i][j].currentFrameColumns = 0;
+							monster.bossSkullBoom[i][j].currentFrameRows += 1;
+						}
+						if(monster.bossSkullBoom[i][j].currentFrameColumns == 4 && monster.bossSkullBoom[i][j].currentFrameRows == 2){
+							monster.bossSkullBoom[i][j].currentFrameColumns = 0;
+							monster.bossSkullBoom[i][j].currentFrameRows = 0;
+							monster.bossSkullBoom[i][j].status = 0;
+						}
+					}
+				}
+			}
+		}
+		var laughSwitch = 0
+		function bossSkullBoomSet(){
+
+			if(laughSwitch == 1 && bossSkullBoom.elapsedTime == 100){
+				creepyAudio.currentTime = 0
+				creepyAudio.volume = 1
+				creepyAudio.play()
+			}
+
+			bossSkullBoom.elapsedTime += 1
+
+			if(bossSkullBoom.elapsedTime == 220){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+					monster.bossSkullBeforeBoom[1][0].status = 1
+					monster.bossSkullBeforeBoom[2][0].status = 1
+					monster.bossSkullBeforeBoom[3][0].status = 1
+					monster.bossSkullBeforeBoom[4][0].status = 1
+					monster.bossSkullBeforeBoom[5][0].status = 1
+					monster.bossSkullBeforeBoom[1][9].status = 1
+					monster.bossSkullBeforeBoom[2][9].status = 1
+					monster.bossSkullBeforeBoom[3][9].status = 1
+					monster.bossSkullBeforeBoom[4][9].status = 1
+					monster.bossSkullBeforeBoom[5][9].status = 1
+				}
+			}
+
+						if(bossSkullBoom.elapsedTime == 270){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[0][i].status = 1;
+								monster.bossSkullBoom[6][i].status = 1;
+								monster.bossSkullBoom[1][0].status = 1
+								monster.bossSkullBoom[2][0].status = 1
+								monster.bossSkullBoom[3][0].status = 1
+								monster.bossSkullBoom[4][0].status = 1
+								monster.bossSkullBoom[5][0].status = 1
+								monster.bossSkullBoom[1][9].status = 1
+								monster.bossSkullBoom[2][9].status = 1
+								monster.bossSkullBoom[3][9].status = 1
+								monster.bossSkullBoom[4][9].status = 1
+								monster.bossSkullBoom[5][9].status = 1
+							}
+						}
+			if(bossSkullBoom.elapsedTime == 360){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+					monster.bossSkullBeforeBoom[0][4].status = 1;
+					monster.bossSkullBeforeBoom[1][4].status = 1;
+					monster.bossSkullBeforeBoom[2][4].status = 1;
+					monster.bossSkullBeforeBoom[5][4].status = 1;
+					monster.bossSkullBeforeBoom[6][4].status = 1;
+					monster.bossSkullBeforeBoom[0][5].status = 1;
+					monster.bossSkullBeforeBoom[1][5].status = 1;
+					monster.bossSkullBeforeBoom[2][5].status = 1;
+					monster.bossSkullBeforeBoom[5][5].status = 1;
+					monster.bossSkullBeforeBoom[6][5].status = 1;
+				}
+			}
+						if(bossSkullBoom.elapsedTime == 410){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[3][i].status = 1;
+								monster.bossSkullBoom[4][i].status = 1;
+								monster.bossSkullBoom[0][4].status = 1;
+								monster.bossSkullBoom[1][4].status = 1;
+								monster.bossSkullBoom[2][4].status = 1;
+								monster.bossSkullBoom[5][4].status = 1;
+								monster.bossSkullBoom[6][4].status = 1;
+								monster.bossSkullBoom[0][5].status = 1;
+								monster.bossSkullBoom[1][5].status = 1;
+								monster.bossSkullBoom[2][5].status = 1;
+								monster.bossSkullBoom[5][5].status = 1;
+								monster.bossSkullBoom[6][5].status = 1;
+							}
+						}
+
+			if(bossSkullBoom.elapsedTime == 500){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+			}
+			if(bossSkullBoom.elapsedTime == 525){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+				}
+			}
+			if(bossSkullBoom.elapsedTime == 550){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+				}
+			}
+						if(bossSkullBoom.elapsedTime == 590){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[0][i].status = 1;
+								monster.bossSkullBoom[6][i].status = 1;
+							}
+						}
+						if(bossSkullBoom.elapsedTime == 615){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[1][i].status = 1;
+								monster.bossSkullBoom[5][i].status = 1;
+							}
+						}
+						if(bossSkullBoom.elapsedTime == 640){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[2][i].status = 1;
+								monster.bossSkullBoom[4][i].status = 1;
+							}
+						}
+			if(bossSkullBoom.elapsedTime == 730){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 755){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 780){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+				}
+			}	
+						if(bossSkullBoom.elapsedTime == 820){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[3][i].status = 1;
+							}
+						}	
+						if(bossSkullBoom.elapsedTime == 845){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[2][i].status = 1;
+								monster.bossSkullBoom[4][i].status = 1;
+							}
+						}	
+						if(bossSkullBoom.elapsedTime == 870){
+							explosionAudio.currentTime = 0;
+							explosionAudio.play()
+							for(i = 0; i < 10; i ++){
+								monster.bossSkullBoom[1][i].status = 1;
+								monster.bossSkullBoom[5][i].status = 1;
+							}
+						}
+			if(bossSkullBoom.elapsedTime == 930){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 940){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 950){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+				}
+			}
+			if(bossSkullBoom.elapsedTime == 960){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+				}
+			}
+			if(bossSkullBoom.elapsedTime == 970){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+				}
+			}	
+								if(bossSkullBoom.elapsedTime == 1020){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[0][i].status = 1;
+									}
+								}	
+								if(bossSkullBoom.elapsedTime == 1030){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[6][i].status = 1;
+									}
+								}	
+								if(bossSkullBoom.elapsedTime == 1040){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[1][i].status = 1;
+									}
+								}
+								if(bossSkullBoom.elapsedTime == 1050){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[5][i].status = 1;
+									}
+								}
+								if(bossSkullBoom.elapsedTime == 1060){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[2][i].status = 1;
+									}
+								}
+
+			if(bossSkullBoom.elapsedTime == 1110){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 1120){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+				}
+			}	
+			if(bossSkullBoom.elapsedTime == 1130){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+				}
+			}
+			if(bossSkullBoom.elapsedTime == 1140){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+			}
+								if(bossSkullBoom.elapsedTime == 1190){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[0][i].status = 1;
+									}
+								}	
+								if(bossSkullBoom.elapsedTime == 1200){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[2][i].status = 1;
+									}
+								}	
+								if(bossSkullBoom.elapsedTime == 1210){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[4][i].status = 1;
+									}
+								}
+								if(bossSkullBoom.elapsedTime == 1220){
+									explosionAudio.currentTime = 0;
+									explosionAudio.play()
+									for(i = 0; i < 10; i ++){
+										monster.bossSkullBoom[6][i].status = 1;
+									}
+								}
+			
+			if(bossSkullBoom.elapsedTime == 1270){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+			}	
+									if(bossSkullBoom.elapsedTime == 1350){
+										explosionAudio.currentTime = 0;
+										explosionAudio.play()
+										for(i = 0; i < 10; i ++){
+											monster.bossSkullBoom[0][i].status = 1;
+											monster.bossSkullBoom[2][i].status = 1;
+											monster.bossSkullBoom[3][i].status = 1;
+											monster.bossSkullBoom[4][i].status = 1;
+											monster.bossSkullBoom[5][i].status = 1;
+											monster.bossSkullBoom[6][i].status = 1;
+										}
+									}	
+			if(bossSkullBoom.elapsedTime == 1430){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+			}						
+									if(bossSkullBoom.elapsedTime == 1510){
+										explosionAudio.currentTime = 0;
+										explosionAudio.play()
+										for(i = 0; i < 10; i ++){
+											monster.bossSkullBoom[0][i].status = 1;
+											monster.bossSkullBoom[1][i].status = 1;
+											monster.bossSkullBoom[2][i].status = 1;
+											monster.bossSkullBoom[3][i].status = 1;
+											monster.bossSkullBoom[4][i].status = 1;
+											monster.bossSkullBoom[6][i].status = 1;
+										}
+									}	
+
+			if(bossSkullBoom.elapsedTime == 1590){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 7; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+					monster.bossSkullBeforeBoom[0][9].status = 1;
+					monster.bossSkullBeforeBoom[1][9].status = 1;
+					monster.bossSkullBeforeBoom[2][9].status = 1;
+					monster.bossSkullBeforeBoom[3][9].status = 1;
+					monster.bossSkullBeforeBoom[4][9].status = 1;
+					monster.bossSkullBeforeBoom[5][9].status = 1;
+					monster.bossSkullBeforeBoom[6][9].status = 1;
+			}	
+									if(bossSkullBoom.elapsedTime == 1670){
+										explosionAudio.currentTime = 0;
+										explosionAudio.play()
+										for(i = 0; i < 7; i ++){
+											monster.bossSkullBoom[0][i].status = 1;
+											monster.bossSkullBoom[1][i].status = 1;
+											monster.bossSkullBoom[2][i].status = 1;
+											monster.bossSkullBoom[3][i].status = 1;
+											monster.bossSkullBoom[4][i].status = 1;
+											monster.bossSkullBoom[5][i].status = 1;
+											monster.bossSkullBoom[6][i].status = 1;
+										}
+											monster.bossSkullBoom[0][9].status = 1;
+											monster.bossSkullBoom[1][9].status = 1;
+											monster.bossSkullBoom[2][9].status = 1;
+											monster.bossSkullBoom[3][9].status = 1;
+											monster.bossSkullBoom[4][9].status = 1;
+											monster.bossSkullBoom[5][9].status = 1;
+											monster.bossSkullBoom[6][9].status = 1;
+									}	
+			if(bossSkullBoom.elapsedTime == 1750){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 3; i < 10; i ++){
+					monster.bossSkullBeforeBoom[0][i].status = 1;
+					monster.bossSkullBeforeBoom[1][i].status = 1;
+					monster.bossSkullBeforeBoom[2][i].status = 1;
+					monster.bossSkullBeforeBoom[3][i].status = 1;
+					monster.bossSkullBeforeBoom[4][i].status = 1;
+					monster.bossSkullBeforeBoom[5][i].status = 1;
+					monster.bossSkullBeforeBoom[6][i].status = 1;
+				}
+					monster.bossSkullBeforeBoom[0][0].status = 1;
+					monster.bossSkullBeforeBoom[1][0].status = 1;
+					monster.bossSkullBeforeBoom[2][0].status = 1;
+					monster.bossSkullBeforeBoom[3][0].status = 1;
+					monster.bossSkullBeforeBoom[4][0].status = 1;
+					monster.bossSkullBeforeBoom[5][0].status = 1;
+					monster.bossSkullBeforeBoom[6][0].status = 1;
+			}						
+									if(bossSkullBoom.elapsedTime == 1830){
+										explosionAudio.currentTime = 0;
+										explosionAudio.play()
+										for(i = 3; i < 10; i ++){
+											monster.bossSkullBoom[0][i].status = 1;
+											monster.bossSkullBoom[1][i].status = 1;
+											monster.bossSkullBoom[2][i].status = 1;
+											monster.bossSkullBoom[3][i].status = 1;
+											monster.bossSkullBoom[4][i].status = 1;
+											monster.bossSkullBoom[5][i].status = 1;
+											monster.bossSkullBoom[6][i].status = 1;
+										}
+											monster.bossSkullBoom[0][0].status = 1;
+											monster.bossSkullBoom[1][0].status = 1;
+											monster.bossSkullBoom[2][0].status = 1;
+											monster.bossSkullBoom[3][0].status = 1;
+											monster.bossSkullBoom[4][0].status = 1;
+											monster.bossSkullBoom[5][0].status = 1;
+											monster.bossSkullBoom[6][0].status = 1;
+									}	
+			if(bossSkullBoom.elapsedTime == 1910){
+				beforeExplosionAudio.currentTime = 0;
+				beforeExplosionAudio.play()
+				for(i = 0; i < 7; i ++){
+					for(j = 0; j < 10; j ++){
+						monster.bossSkullBeforeBoom[i][j].status = 1;
+						monster.bossSkullBeforeBoom[3][4].status = 0;
+						monster.bossSkullBeforeBoom[3][5].status = 0;
+						monster.bossSkullBeforeBoom[4][4].status = 0;
+						monster.bossSkullBeforeBoom[4][5].status = 0;
+					}
+				}
+			}			
+										if(bossSkullBoom.elapsedTime == 1990){
+											explosionAudio.currentTime = 0;
+											explosionAudio.play()
+											for(i = 0; i < 7; i ++){
+												for(j = 0; j < 10; j ++){
+													monster.bossSkullBoom[i][j].status = 1;
+													monster.bossSkullBoom[3][4].status = 0;
+													monster.bossSkullBoom[3][5].status = 0;
+													monster.bossSkullBoom[4][4].status = 0;
+													monster.bossSkullBoom[4][5].status = 0;
+												}
+											}
+										}					
+
+							if(bossSkullBoom.elapsedTime == 1991){
+									bossSkullBoom.elapsedTime = 0
+									laughSwitch = 1;
+								}  // 죽고나서 시간 빠르게도 가능하겠네
+		}
+
+		var bossSkullBeforeBoomImage = new Image();
+		bossSkullBeforeBoomImage.src = "./img/beforeExplosion.png"
+
+		bossSkullBeforeBoomImage.ele = {}
+		bossSkullBeforeBoomImage.ele.w = 640
+		bossSkullBeforeBoomImage.ele.h = 512
+
+		bossSkullBeforeBoomImage.ele.columns = 5
+		bossSkullBeforeBoomImage.ele.rows = 4
+
+		bossSkullBeforeBoomImage.ele.oneSheetW = bossSkullBeforeBoomImage.ele.w / bossSkullBeforeBoomImage.ele.columns
+		bossSkullBeforeBoomImage.ele.oneSheetH = bossSkullBeforeBoomImage.ele.h / bossSkullBeforeBoomImage.ele.rows
+
+		bossSkullBeforeBoomImage.ele.currentFrameColumns = 0;
+		bossSkullBeforeBoomImage.ele.currentFrameRows = 0;
+		
+		bossSkullBeforeBoom = {}
+
+		function bossSkullBeforeBoomMaking(){
+	
+			bossSkullBeforeBoomImage.ele.currentFrameColumns = 0
+			bossSkullBeforeBoomImage.ele.currentFrameRows = 0 
+
+			monster.bossSkullBeforeBoom = [[],[],[],[],[],[],[]]
+
+			for(i = 0; i < 7; i++){
+
+				for(j = 0; j < 10; j++){
+
+					monster.bossSkullBeforeBoom[i][j] = {x : j * 50, y : 150 + i * 50, w : 50, h : 50, status : 0, fullTime : 0, fullTimeNum : 2, currentFrameColumns : 0, currentFrameRows : 0}
+
+				}
+			}	
+		}
+
+		function bossSkullBeforeBoomDraw(){
+
+			for(i = 0; i < monster.bossSkullBeforeBoom.length; i++){
+
+				for(j = 0; j < monster.bossSkullBeforeBoom[i].length; j++){
+
+					if(monster.bossSkullBeforeBoom[i][j].status == 1){
+
+					ctx.drawImage(bossSkullBeforeBoomImage, bossSkullBeforeBoomImage.ele.oneSheetW * monster.bossSkullBeforeBoom[i][j].currentFrameColumns, bossSkullBeforeBoomImage.ele.oneSheetH * monster.bossSkullBeforeBoom[i][j].currentFrameRows, bossSkullBeforeBoomImage.ele.oneSheetW, bossSkullBeforeBoomImage.ele.oneSheetH, monster.bossSkullBeforeBoom[i][j].x, monster.bossSkullBeforeBoom[i][j].y, monster.bossSkullBeforeBoom[i][j].w, monster.bossSkullBeforeBoom[i][j].h)
+
+						monster.bossSkullBeforeBoom[i][j].fullTime += 1;
+						if(monster.bossSkullBeforeBoom[i][j].fullTime > monster.bossSkullBeforeBoom[i][j].fullTimeNum){
+						monster.bossSkullBeforeBoom[i][j].fullTime = 0;
+						monster.bossSkullBeforeBoom[i][j].currentFrameColumns += 1;	
+						}
+
+						if(monster.bossSkullBeforeBoom[i][j].currentFrameColumns == bossSkullBeforeBoomImage.ele.columns){
+							monster.bossSkullBeforeBoom[i][j].currentFrameColumns = 0;
+							monster.bossSkullBeforeBoom[i][j].currentFrameRows += 1;
+						}
+						if(monster.bossSkullBeforeBoom[i][j].currentFrameColumns == 3 && monster.bossSkullBeforeBoom[i][j].currentFrameRows == 3){
+							monster.bossSkullBeforeBoom[i][j].currentFrameColumns = 0;
+							monster.bossSkullBeforeBoom[i][j].currentFrameRows = 0;
+							monster.bossSkullBeforeBoom[i][j].status = 0;
+						}
+					}
+				}
+			}
+		}
+
+		//boss Grass Hp Bar Draw
+		var bossSkullHpBarImage = new Image()
+		bossSkullHpBarImage.src = "./img/skullLife.png"
+
+		ctx.drawImage(bossSkullHpBarImage, 400, 10, 40, 40)
+
+
+		bossSkullHpBarImage.ele = {}
+		bossSkullHpBarImage.ele.w = 2700
+		bossSkullHpBarImage.ele.h = 440
+
+		bossSkullHpBarImage.ele.columns = 15
+		bossSkullHpBarImage.ele.rows = 5
+
+		bossSkullHpBarImage.ele.oneSheetW = bossSkullHpBarImage.ele.w / bossSkullHpBarImage.ele.columns
+		bossSkullHpBarImage.ele.oneSheetH = bossSkullHpBarImage.ele.h / bossSkullHpBarImage.ele.rows
+
+		bossSkullHpBarImage.ele.currentFrameColumns = 0;
+		bossSkullHpBarImage.ele.currentFrameRows = 0;
+
+		bossSkull.hp = {}
+		bossSkull.hp.num = 4
+		bossSkull.hp.w = 40
+		bossSkull.hp.h = 40;
+		bossSkull.hp.distance = 55;
+
+		bossSkull.hp.elapsedTime = 0;
+		bossSkull.hp.elapsedTimeResetNum = 5;
+
+		function bossSkullHpBarDraw(){
+
+			bossSkull.hp.elapsedTime += 1;
+			
+			for(i = 0; i < bossSkull.hp.num; i++){
+
+			ctx.drawImage(bossSkullHpBarImage, 300 + i * bossSkull.hp.distance, 10, bossSkull.hp.w, bossSkull.hp.h)
+
+			}
+
+			if(bossSkull.hp.elapsedTime > 1018){
+				bossSkull.hp.elapsedTime = 0
+				bossSkull.hp.num += -1
+			}
+			if(bossSkull.hp.num == 0){
+				
+				desertBossDieAudio.play()
+
+			}
+
+		}	
+
+		var bossSkullDieImage = new Image()
+		bossSkullDieImage.src = "./img/desertBoss.png"
+
+		bossSkullDieImage.ele = {}
+		bossSkullDieImage.ele.w = 500
+		bossSkullDieImage.ele.h = 256
+		bossSkullDieImage.ele.x = 200
+		bossSkullDieImage.ele.y = 50
+
+		bossSkullDieImage.ele.columns = 10
+		bossSkullDieImage.ele.rows = 4
+
+		bossSkullDieImage.ele.oneSheetW = bossSkullDieImage.ele.w / bossSkullDieImage.ele.columns
+		bossSkullDieImage.ele.oneSheetH = bossSkullDieImage.ele.h / bossSkullDieImage.ele.rows
+
+		bossSkullDieImage.ele.currentFrameColumns = 0;
+		bossSkullDieImage.ele.currentFrameRows = 0;
+		bossSkullDieImage.ele.fullTime = 0;
+		bossSkullDieImage.ele.fullTimeNum = 7;
+
+		bossSkullDieImage.ele.elapsedTime = 0; 
+
+		function bossSkullDieDraw(){
+
+			bossSkullDieImage.ele.elapsedTime += 1;
+
+			if(bossSkullDieImage.ele.elapsedTime < 150){
+				ctx.drawImage(bossSkullDieImage, bossSkullDieImage.ele.oneSheetW * 9, bossSkullDieImage.ele.currentFrameRows * bossSkullDieImage.ele.oneSheetH, bossSkullDieImage.ele.oneSheetW, bossSkullDieImage.ele.oneSheetH, bossSkull.x + 10, bossSkull.y - 50, bossSkull.w, bossSkull.h)
+
+				bossSkullDieImage.ele.fullTime += 1;
+				if(bossSkullDieImage.ele.fullTime > bossSkullDieImage.ele.fullTimeNum){
+					bossSkullDieImage.ele.fullTime = 0
+					bossSkullDieImage.ele.currentFrameRows += 1;
+
+				}
+				if(bossSkullDieImage.ele.currentFrameRows == 4){
+					bossSkullDieImage.ele.currentFrameRows = 0
+				}
+			}
+
+			if(bossSkullDieImage.ele.elapsedTime >= 150){
+
+				ctx.drawImage(bossSkullDieImage, bossSkullDieImage.ele.oneSheetW * 9, 0, bossSkullDieImage.ele.oneSheetW, bossSkullDieImage.ele.oneSheetH, bossSkull.x + 10, bossSkull.y - 50, bossSkull.w, bossSkull.h)
+
+			
+			}
+
+
+				//죽는소리 어디넣었는지알아보고 죽는모션 그리고 시간조정해서 좀더 늦게 끝나게
+		}
+
+
+	function bossDraw(){
+		//boss hp 는 최초에 정의 되어있음
+
+		if(currentTileStage == 0){
+
+			if(bossGrass.hp.num == 0){
+				bossGrassDieDraw()
+			} else {
+			bossGrassdraw()
+			bossGrassHpBarDraw()
+			}
+
+			if(bossGrassDieImage.ele.elapsedTime > 100){
+				grassBossAudio.volume -= 0.003
+				if(grassBossAudio.volume < 0.2){
+
+					grassBossDieAudio.pause()
+					grassBossDieAudio.currentTime = 0;
+					grassBossAudio.pause();
+					grassBossAudio.currentTime = 0;
+						
+					bossGrass.winSwitch = 1
+				}
+			}
+
+		}
+		
+		if(currentTileStage == 1){
+
+			if(bossSkull.hp.num == 0){
+				bossSkullDieDraw()
+			} else {
+			bossSkullDraw()
+			bossSkullHpBarDraw()
+			}
+
+			if(bossSkullDieImage.ele.elapsedTime > 300){
+				desertBossAudio.volume -= 0.003
+				if(desertBossAudio.volume < 0.2){
+
+					desertBossAudio.pause()
+					desertBossAudio.currentTime = 0
+					desertBossDieAudio.pause()
+					desertBossDieAudio.currentTime = 0
+					creepyAudio.pause()
+					creepyAudio.currentTime = 0
+					explosionAudio.pause()
+					explosionAudio.currentTime = 0
+					beforeExplosionAudio.pause()
+					beforeExplosionAudio.currentTime = 0
+
+					bossSkull.winSwitch = 1
+				}
+			}
+		}	
+	}
+
+//////////////////////
+	function monsterStageChange(){
+		if(stage[currentTileStage][currentStage].monster[0] == "bug" && monster.refre.bug.status == 0){
+			monsterBugMaking()
+		}
+		if(stage[currentTileStage][currentStage].monster[1] == "lizard" && monster.refre.lizard.status == 0){
+			monsterLizardMaking()
+		}
+		if(stage[currentTileStage][currentStage].monster[2] == "bossGrass" && monster.refre.bossGrassAxe.status == 0 && bossGrass.hp.num != 0){
+			if(bossGrass.elapsedTime >= 200){
+			monsterBossGrassAxeMaking()
+			}
+		}
+		// || && 줄이자
+		if((stage[currentTileStage][currentStage].monster[3] == "tailorType1" || stage[currentTileStage][currentStage].monster[4] == "tailorType2") && monster.refre.tailor.status == 0){
+			monsterTailorMaking()
+		}
+
+
+		if((stage[currentTileStage][currentStage].monster[5] == "zombieType1" || stage[currentTileStage][currentStage].monster[6] == "zombieType2") && monster.refre.zombie.status == 0){
+			monsterZombieMaking()
+		}
+		if(stage[currentTileStage][currentStage].monster[7] == "bossSkull" && monster.refre.bossSkullBoom.status == 0 && bossSkull.hp.num != 0){
+			//최초 한번 실행하기 위해서인가
+			bossSkullBeforeBoomMaking()
+			monsterbossSkullBoomMaking()
+		}
+
+
+	}
+	
+	//monsterDraw
+	function monsterDraw(){
+
+		if(stage[currentTileStage][currentStage].monster[0] == "bug" && monster.refre.bug.status == 1){
+		monsterBugDraw()
+		manMonsterCoDe("bug", 20, 20)
+		}
+		if(stage[currentTileStage][currentStage].monster[1] == "lizard" && monster.refre.lizard.status == 1){
+		monsterLizardDraw()
+		manMonsterCoDe("lizard", 35, 30)
+		}
+
+		if((stage[currentTileStage][currentStage].monster[3] == "tailorType1" || stage[currentTileStage][currentStage].monster[4] == "tailorType2") && monster.refre.tailor.status == 1){
+		monsterTailorDraw()
+		manMonsterCoDe("tailor", 20, 20)
+		}
+
+		if((stage[currentTileStage][currentStage].monster[5] == "zombieType1" || stage[currentTileStage][currentStage].monster[6] == "zombieType2") && monster.refre.zombie.status == 1){
+		monsterZombieDraw()
+		manMonsterCoDe("zombie", 35, 15)
+		}
+
+		//보스 유무 체크
+		if(stage[currentTileStage][currentStage].monster[2] == "bossGrass" && monster.refre.bossGrassAxe.status == 1 && bossGrass.hp.num != 0){
+		monsterBossGrassAxeDraw()
+		monsterBossGrassAxeCheckReMaking()
+		manMonsterCoDe("bossGrassAxe", 25, 25)
+		}
+		if(stage[currentTileStage][currentStage].monster[7] == "bossSkull" && monster.refre.bossSkullBoom.status == 1 && bossSkull.hp.num != 0){
+		bossSkullBoomSet()
+		bossSkullBeforeBoomDraw()
+		bossSkullBoomDraw()
+		manMonsterCoDeTwo("bossSkullBoom", 20, 15)
+		}
+	}
+
+	//collisionDetection
+	function coinCollisionDetection(){
+		//man vs coin
+		var ER = 15; //오차범위 error range
+		for(i = 0; i < stage[currentTileStage][currentStage].coin.length; i++){
+			if(man.x > stage[currentTileStage][currentStage].coin[i].x - coin.w + ER && man.x < stage[currentTileStage][currentStage].coin[i].x + coin.w - ER && man.y > stage[currentTileStage][currentStage].coin[i].y - coin.h + ER && man.y < stage[currentTileStage][currentStage].coin[i].y + coin.h - ER && stage[currentTileStage][currentStage].coin[i].status){
+				stage[currentTileStage][currentStage].coin[i].status = 0
+				eatCoinAudio.currentTime = 0;
+				eatCoinAudio.play()
+			}
+		}
+	}
+	//cheak win condition
+	function cheakWinCondition(){
+
+		function monsterRefreReset(){
+			monster.refre.bug.status = 0;
+			monster.refre.lizard.status = 0;
+			monster.refre.bossGrassAxe.status = 0;
+			monster.refre.tailor.status = 0;
+			monster.refre.zombie.status = 0;
+			monster.refre.bossSkullBoom.status = 0
+		}
+
+
+		//보스 스테이지 아닐경우
+		if(boss.stage.status == 0){
+			var sum = 0;
+			for(i = 0; i < stage[currentTileStage][currentStage].coin.length; i++){
+			sum += stage[currentTileStage][currentStage].coin[i].status
+			}
+			if(sum == 0){
+				currentStage += 1;
+				for(i = 0; i < stage[currentTileStage][currentStage].monster; i++){
+					monster.refre[stage[currentTileStage][currentStage].monster[i]].status = 0;
+				}
+				stageBar.status = 1
+				//초기값 복구(써야되는것만)
+				man.x = c.width/2 - 25
+				man.y = c.height/2 - 25
+				monsterRefreReset()// 몬스터 위치 재정의
+			}
+		}
+		if(boss.stage.status == 1){
+			//보스에따라 다르게
+			if(bossGrass.winSwitch == 1){
+				bossGrass.winSwitch = 0
+				stageBar.status = 1
+				//초기값 복구(써야되는것만)
+				man.x = c.width/2 - 25
+				man.y = c.height/2 - 25
+				monsterRefreReset()
+				//monsterBugMaking() // 몬스터 위치 재정의
+				//monsterLizardMaking()
+				//타일 스테이지 업
+				boss.stage.status = 0;
+				currentTileStage += 1
+				currentStage = 0 
+			}
+
+			if(bossSkull.winSwitch == 1){
+				bossSkull.winSwitch = 1
+				stageBar.status = 1
+				//초기값 복구(써야되는것만)
+				man.x = c.width/2 - 25
+				man.y = c.height/2 - 25
+				monsterRefreReset()
+				//monsterBugMaking() // 몬스터 위치 재정의
+				//monsterLizardMaking()
+				//타일 스테이지 업
+				boss.stage.status = 0;
+				currentTileStage += 1
+				currentStage = 0 
+			}
+		}
+	}
+
+	function manMonsterCoDe(input, ERW, ERH){
+		for(i = 0; i < monster[input].length; i++){
+		manCenterX = man.x + man.w/2
+		manCenterY = man.y + man.h/2
+
+		monsterCenterX = monster[input][i].x + monster[input][i].w/2
+		monsterCenterY = monster[input][i].y + monster[input][i].h/2
+
+		VX = manCenterX - monsterCenterX
+		VY = manCenterY - monsterCenterY
+
+		overlapX = (man.w/2 + monster[input][i].w/2) - Math.abs(VX)
+		overlapY = (man.h/2 + monster[input][i].h/2) - Math.abs(VY)
+
+		var ERWW = ERW
+		var ERHH = ERH
+		//var Er = 15
+			if(overlapX > ERWW && overlapY > ERHH){
+				lose.status = 1;
+			}
+		}
+	}
+
+	function manMonsterCoDeTwo(input, ERW, ERH){
+		for(i = 0; i < monster[input].length; i++){
+			
+			for(j = 0; j < monster[input][i].length; j++){
+				
+				if(monster[input][i][j].status == 1){
+
+					manCenterX = man.x + man.w/2
+					manCenterY = man.y + man.h/2
+
+					monsterCenterX = monster[input][i][j].x + monster[input][i][j].w/2
+					monsterCenterY = monster[input][i][j].y + monster[input][i][j].h/2
+
+					VX = manCenterX - monsterCenterX
+					VY = manCenterY - monsterCenterY
+
+					overlapX = (man.w/2 + monster[input][i][j].w/2) - Math.abs(VX)
+					overlapY = (man.h/2 + monster[input][i][j].h/2) - Math.abs(VY)
+
+					var ERW = ERW
+					var ERH = ERH
+					//var Er = 15
+						if(overlapX > ERW && overlapY > ERH){
+							lose.status = 1;
+						}
+				}
+			}
+		}
+	}
+
+	//stageㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	var currentTileStage = 0
+	var currentStage = 0
+		
+	stage = [[],[],[],[],[]]
+	//stage 0 - 0
+	stage[0][0] = {}
+	stage[0][0].tile = [
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	]
+	stage[0][0].coin = []
+	stage[0][0].coin[0] = new CoinProduce(150, 150, 1)
+	stage[0][0].coin[1] = new CoinProduce(400, 250, 1)
+	stage[0][0].coin[2] = new CoinProduce(300, 450, 1)
+	stage[0][0].coin[3] = new CoinProduce(126, 263, 1)
+	stage[0][0].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[0][0].monster = []
+	stage[0][0].monster[0] = null
+	stage[0][0].monster[1] = null
+	//stage 0 - 1
+	stage[0][1] = {}
+	stage[0][1].tile = [
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["tree", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "tree", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "tree", "grass", "grass", "grass", "grass", "tree", "tree", "tree"],
+	["grass", "tree", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "tree", "grass", "grass", "tree", "tree", "tree", "tree", "grass", "tree"],
+	["grass", "tree", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass"]
+	]
+	stage[0][1].coin = []
+	stage[0][1].coin[0] = new CoinProduce(40, 80, 1)
+	stage[0][1].coin[1] = new CoinProduce(300, 150, 1)
+	stage[0][1].coin[2] = new CoinProduce(450, 300, 1)
+	stage[0][1].coin[2] = new CoinProduce(450, 450, 1)
+
+
+	stage[0][1].monster = []
+	stage[0][1].monster[0] = null
+	stage[0][1].monster[1] = null
+	//stage 0 - 2
+	stage[0][2] = {}
+	stage[0][2].tile = [
+	["grass", "grass", "grass", "tree", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "tree", "tree", "tree", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "tree", "tree", "tree", "grass", "grass", "tree", "tree", "grass"],
+	["grass", "tree", "tree", "tree", "tree", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "grass"],
+	["tree", "tree", "tree", "grass", "tree", "grass", "grass", "grass", "tree", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "grass", "tree", "grass"],
+	["grass", "tree", "tree", "tree", "tree", "grass", "grass", "tree", "grass", "tree"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "grass"],
+	["tree", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass"],
+	]
+	stage[0][2].coin = []
+	stage[0][2].coin[0] = new CoinProduce(50, 450, 1)
+	stage[0][2].coin[1] = new CoinProduce(250, 50, 1)
+	stage[0][2].coin[2] = new CoinProduce(400, 50, 1)
+	stage[0][2].coin[3] = new CoinProduce(0, 0, 1)
+	stage[0][2].coin[4] = new CoinProduce(450, 300, 1)
+
+	stage[0][2].monster = []
+	stage[0][2].monster[0] = "bug"
+	stage[0][2].monster[1] = null
+
+	//stage 0 - 3
+	stage[0][3] = {}
+	stage[0][3].tile = [
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "tree", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["tree", "tree", "grass", "tree", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "tree", "grass", "tree", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "grass", "tree", "tree", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["tree", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "tree", "tree", "grass", "grass", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	]
+	stage[0][3].coin = []
+	stage[0][3].coin[0] = new CoinProduce(150, 150, 1)
+	stage[0][3].coin[1] = new CoinProduce(400, 250, 1)
+	stage[0][3].coin[2] = new CoinProduce(300, 450, 1)
+	stage[0][3].coin[3] = new CoinProduce(126, 263, 1)
+	stage[0][3].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[0][3].monster = []
+	stage[0][3].monster[0] = null
+	stage[0][3].monster[1] = "lizard"
+
+	//stage 0 - 4
+	stage[0][4] = {}
+	stage[0][4].tile = [
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "tree", "grass", "grass", "tree", "grass", "tree", "tree"],
+	["tree", "tree", "grass", "tree", "grass", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "grass", "tree", "tree", "grass"],
+	["grass", "tree", "tree", "tree", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree"],
+	["tree", "grass", "grass", "grass", "grass", "tree", "grass", "grass", "grass", "grass"],
+	["tree", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass"],
+	]
+	stage[0][4].coin = []
+	stage[0][4].coin[0] = new CoinProduce(30, 450, 1)
+	stage[0][4].coin[1] = new CoinProduce(350, 30, 1)
+	stage[0][4].coin[2] = new CoinProduce(177, 200, 1)
+	stage[0][4].coin[3] = new CoinProduce(320, 336, 1)
+	stage[0][4].coin[4] = new CoinProduce(30, 256, 1)
+
+	stage[0][4].monster = []
+	stage[0][4].monster[0] = "bug"
+	stage[0][4].monster[1] = "lizard"
+
+	//stage 0 - 5 ( last = boss)
+	stage[0][5] = {}
+	stage[0][5].tile = [
+	["grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "tree", "grass", "tree", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "tree", "grass", "grass", "grass"],
+	["tree", "tree", "grass", "tree", "grass", "grass", "grass", "tree", "grass", "grass"],
+	["grass", "tree", "tree", "tree", "tree", "tree", "grass", "tree", "tree", "tree"],
+	["grass", "grass", "grass", "tree", "grass", "tree", "grass", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "tree", "tree", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass"],
+	["grass", "grass", "grass", "grass", "tree", "grass", "tree", "grass", "grass", "grass"],
+	["grass", "grass", "grass", "grass", "grass", "grass", "grass", "tree", "grass", "grass"],
+	]
+	stage[0][5].coin = []
+
+	stage[0][5].monster = []
+	stage[0][5].monster[0] = null
+	stage[0][5].monster[1] = null
+	//boss
+	stage[0][5].monster[2] = "bossGrass"
+
+	//stage 1 - 0
+	stage[1][0] = {}
+	stage[1][0].tile = [
+	["desert", "cactus", "desert", "desert", "desert", "desert", "desert", "desert", "cactus", "desert"],
+	["desert", "cactus", "desert", "desert", "desert", "cactus", "desert", "desert", "desert", "desert"],
+	["desert", "cactus", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "desert"],
+	["desert", "desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "desert"],
+	["desert", "desert", "swamp", "swamp", "desert", "desert", "swamp", "swamp", "desert", "desert"],
+	["desert", "desert", "swamp", "swamp", "desert", "desert", "swamp", "swamp", "desert", "desert"],
+	["desert", "cactus", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "desert"],
+	["desert", "desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "cactus", "desert", "desert"],
+	["desert", "desert", "cactus", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	]
+	stage[1][0].coin = []
+	stage[1][0].coin[0] = new CoinProduce(150, 150, 1)
+	stage[1][0].coin[1] = new CoinProduce(400, 250, 1)
+	stage[1][0].coin[2] = new CoinProduce(300, 450, 1)
+	//stage[1][0].coin[3] = new CoinProduce(126, 263, 1)
+	//stage[1][0].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[1][0].monster = []
+	stage[1][0].monster[0] = null
+	stage[1][0].monster[1] = null
+
+	stage[1][0].monster[2] = null
+
+	stage[1][0].monster[3] = null
+	stage[1][0].monster[4] = null
+
+	stage[1][1] = {}
+	stage[1][1].tile = [
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert"],
+	["desert", "swamp", "desert", "desert", "desert", "desert", "desert", "desert", "swamp", "desert"],
+	["desert", "swamp", "desert", "swamp", "swamp", "swamp", "swamp", "desert", "swamp", "desert"],
+	["desert", "swamp", "desert", "swamp", "desert", "desert", "swamp", "desert", "swamp", "desert"],
+	["desert", "swamp", "desert", "swamp", "desert", "desert", "swamp", "desert", "swamp", "desert"],
+	["desert", "swamp", "desert", "swamp", "swamp", "swamp", "swamp", "desert", "swamp", "desert"],
+	["desert", "swamp", "desert", "desert", "desert", "desert", "desert", "desert", "swamp", "desert"],
+	["desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	]
+	stage[1][1].coin = []
+	stage[1][1].coin[0] = new CoinProduce(150, 150, 1)
+	stage[1][1].coin[1] = new CoinProduce(400, 250, 1)
+	stage[1][1].coin[2] = new CoinProduce(300, 450, 1)
+	stage[1][1].coin[3] = new CoinProduce(126, 263, 1)
+	stage[1][1].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[1][1].monster = []
+	stage[1][1].monster[0] = null
+	stage[1][1].monster[1] = null
+
+	stage[1][1].monster[2] = null
+
+	stage[1][1].monster[3] = "tailorType1"
+	stage[1][1].monster[4] = null
+	//stage 1 - 2
+	stage[1][2] = {}
+	stage[1][2].tile = [
+	["swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp"],	
+	["swamp", "cactus", "desert", "desert", "swamp", "swamp", "desert", "desert", "cactus", "swamp"],
+	["swamp", "desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "swamp"],
+	["swamp", "desert", "swamp", "desert", "swamp", "swamp", "desert", "swamp", "desert", "swamp"],
+	["swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp"],
+	["swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp"],
+	["swamp", "desert", "swamp", "desert", "swamp", "swamp", "desert", "swamp", "desert", "swamp"],
+	["swamp", "desert", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "desert", "swamp"],
+	["swamp", "cactus", "desert", "desert", "swamp", "swamp", "desert", "desert", "cactus", "swamp"],
+	["swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp", "swamp"]
+	]
+	stage[1][2].coin = []
+	stage[1][2].coin[0] = new CoinProduce(150, 150, 1)
+	stage[1][2].coin[1] = new CoinProduce(400, 250, 1)
+	stage[1][2].coin[2] = new CoinProduce(300, 450, 1)
+	stage[1][2].coin[3] = new CoinProduce(126, 263, 1)
+	stage[1][2].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[1][2].monster = []
+	stage[1][2].monster[0] = null
+	stage[1][2].monster[1] = null
+
+	stage[1][2].monster[2] = null
+
+	stage[1][2].monster[3] = null
+	stage[1][2].monster[4] = "tailorType2"
+	//stage 1 - 2
+	stage[1][3] = {}
+	stage[1][3].tile = [
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "cactus", "desert", "desert", "desert", "desert", "desert", "desert", "cactus", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "cactus", "desert", "desert", "cactus", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "cactus", "desert", "desert", "cactus", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "cactus", "desert", "desert", "desert", "desert", "desert", "desert", "cactus", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	]
+	stage[1][3].coin = []
+	stage[1][3].coin[0] = new CoinProduce(100, 150, 1)
+	stage[1][3].coin[1] = new CoinProduce(400, 250, 1)
+	stage[1][3].coin[2] = new CoinProduce(300, 450, 1)
+	stage[1][3].coin[3] = new CoinProduce(126, 263, 1)
+	stage[1][3].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[1][3].monster = []
+	stage[1][3].monster[0] = null
+	stage[1][3].monster[1] = null
+	
+	stage[1][3].monster[2] = null
+
+	stage[1][3].monster[3] = null
+	stage[1][3].monster[4] = null
+	stage[1][3].monster[5] = "zombieType1"
+
+	//stage 1 - 2
+	stage[1][4] = {}
+	stage[1][4].tile = [
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	["desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert", "desert"],
+	]
+	stage[1][4].coin = []
+	stage[1][4].coin[0] = new CoinProduce(150, 150, 1)
+	stage[1][4].coin[1] = new CoinProduce(400, 250, 1)
+	stage[1][4].coin[2] = new CoinProduce(300, 450, 1)
+	stage[1][4].coin[3] = new CoinProduce(126, 263, 1)
+	stage[1][4].coin[4] = new CoinProduce(0, 0, 1)
+
+	stage[1][4].monster = []
+	stage[1][4].monster[0] = null
+	stage[1][4].monster[1] = null
+	
+	stage[1][4].monster[2] = null
+
+	stage[1][4].monster[3] = null
+	stage[1][4].monster[4] = null
+	stage[1][4].monster[5] = null
+	stage[1][4].monster[6] = "zombieType2"
+
+	//stage 1 - 2
+	stage[1][5] = {}
+	stage[1][5].tile = [
+	["blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood"],
+	["blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood", "blood"],
+	["pyramid", "skull", "skull", "skull", "skull", "skull", "skull", "skull", "skull", "pyramid"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	["egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt", "egypt"],
+	]
+	stage[1][5].coin = []
+
+	stage[1][5].monster = []
+	stage[1][5].monster[0] = null
+	stage[1][5].monster[1] = null
+	
+	stage[1][5].monster[2] = null
+
+	stage[1][5].monster[3] = null
+	stage[1][5].monster[4] = null
+	stage[1][5].monster[5] = null
+	stage[1][5].monster[6] = null
+	//stage 1 - ? boss
+	stage[1][5].monster[7] = "bossSkull"
+
+	//stage 1 - 2
+	stage[2][0] = {}
+	stage[2][0].tile = [
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "iceberg", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	]
+	stage[2][0].coin = []
+	stage[2][0].coin[0] = new CoinProduce(150, 150, 1)
+	stage[2][0].coin[1] = new CoinProduce(400, 250, 1)
+
+	stage[2][0].monster = []
+	stage[2][0].monster[0] = null
+	stage[2][0].monster[1] = null
+	
+	stage[2][0].monster[2] = null
+
+	stage[2][0].monster[3] = null
+	stage[2][0].monster[4] = null
+	stage[2][0].monster[5] = null
+	stage[2][0].monster[6] = null
+	//stage 1 - ? boss
+	stage[2][0].monster[7] = null
+	//stage 1 - 2
+	stage[2][1] = {}
+	stage[2][1].tile = [
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"],
+	["ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2", "ice2"]
+	]
+	stage[2][1].coin = []
+	stage[2][1].coin[0] = new CoinProduce(150, 150, 1)
+	stage[2][1].coin[1] = new CoinProduce(400, 250, 1)
+
+	stage[2][1].monster = []
+	stage[2][1].monster[0] = null
+	stage[2][1].monster[1] = null
+
+	stage[2][1].monster[2] = null
+
+	stage[2][1].monster[3] = null
+	stage[2][1].monster[4] = null
+	stage[2][1].monster[5] = null
+	stage[2][1].monster[6] = null
+	//stage 1 - ? boss
+	stage[2][1].monster[7] = null
+
+	//stage 1 - 2
+	stage[2][2] = {}
+	stage[2][2].tile = [
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"],
+	["ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice"]
+	]
+	stage[2][2].coin = []
+	stage[2][2].coin[0] = new CoinProduce(150, 150, 1)
+	stage[2][2].coin[1] = new CoinProduce(400, 250, 1)
+
+	stage[2][2].monster = []
+	stage[2][2].monster[0] = null
+	stage[2][2].monster[1] = null
+
+	stage[2][2].monster[2] = null
+
+	stage[2][2].monster[3] = null
+	stage[2][2].monster[4] = null
+	stage[2][2].monster[5] = null
+	stage[2][2].monster[6] = null
+	//stage 1 - ? boss
+	stage[2][2].monster[7] = null
+
+	boss = {}
+	boss.stage = {}
+	boss.stage.status = 0;
+
+	//stageStatusBar
+	var stageBar = {}
+	stageBar.status = 1 // off
+	stageBar.currentFrame = 0;
+	stageBar.currentFrameFull = 115;
+	stageBar.x = 400;
+	stageBar.y = c.height/2;
+	stageBar.dx = -14.5
+	stageBar.dxdx = 0.3
+
+	function stageBarDraw(){
+		//보스스테이지인지 판별
+		if(stage[currentTileStage].length == currentStage + 1){
+			boss.stage.status = 1;
+		}
+		//stage 별 Audio 구분
+		//stage0-?
+		if(currentTileStage == 0 && boss.stage.status == 0){
+			islandAudio.play()
+		} else {
+			islandAudio.pause()
+			islandAudio.currentTime = 0;
+		}
+		if(currentTileStage == 1 && boss.stage.status == 0){
+			desertAudio.play()
+		} else {
+			desertAudio.pause()
+			desertAudio.currentTime = 0;
+		}
+		if(currentTileStage == 2 && boss.stage.status == 0){
+			iceAudio.play()
+		} else {
+			iceAudio.pause()
+			iceAudio.currentTime = 0
+		}
+
+		if(boss.stage.status == 1){
+			if(stage[currentTileStage][currentStage].monster[2] == "bossGrass"){
+			grassBossAudio.play()
+			}
+			if(stage[currentTileStage][currentStage].monster[7] == "bossSkull"){
+			desertBossAudio.play()
+			}
+
+
+		var fontSet = "italic 60px Arial"
+		var fillTextSet = "WARNING"
+		var fillStyleSet = "red"
+		} else if (boss.stage.status == 0){
+		var fillTextSet = "STAGE " + (currentTileStage + 1) + " - " + (currentStage + 1)
+		var fillStyleSet = "white"
+		var fontSet = "italic 40px Arial"
+		}
+
+		ctx.beginPath()
+		ctx.rect(0, 0, c.width, c.height)
+		ctx.globalAlpha = 1;
+		ctx.fillStyle = "black"
+		ctx.fill()
+		ctx.font = fontSet
+		ctx.fillStyle = fillStyleSet
+		ctx.fillText(fillTextSet, stageBar.x, stageBar.y);
+		ctx.closePath()
+		stageBar.x += stageBar.dx
+		stageBar.dx += stageBar.dxdx
+		stageBar.currentFrame += 1;
+		if(stageBar.currentFrame > stageBar.currentFrameFull){
+			stageBar.currentFrame = 0;
+			stageBar.status = 0;
+			stageBar.x = 400
+			stageBar.dx = -14.5
+		}
+	}
+
+	//lose
+
+	lose = {}
+	lose.status = 0;
+
+	var loseExplosionImage = new Image();
+	loseExplosionImage.src = "./img/explosion.png";
+
+	loseExplosion = {}
+	loseExplosion.ele = {}
+	loseExplosion.ele.w = 900
+	loseExplosion.ele.h = 900
+	loseExplosion.ele.columns = 9
+	loseExplosion.ele.rows = 9
+
+	loseExplosion.ele.oneSheetW = loseExplosion.ele.w / loseExplosion.ele.columns
+	loseExplosion.ele.oneSheetH = loseExplosion.ele.h / loseExplosion.ele.rows
+
+	loseExplosion.ele.currentFrameColumns = 0;
+	loseExplosion.ele.currentFrameRows = 0;
+
+	function loseExplosionDraw(){
+		man.speed = 0;
+		man.swampSpeed = 0;
+		ctx.drawImage(loseExplosionImage, loseExplosion.ele.currentFrameColumns * loseExplosion.ele.oneSheetW, loseExplosion.ele.currentFrameRows * loseExplosion.ele.oneSheetH, loseExplosion.ele.oneSheetW, loseExplosion.ele.oneSheetH, man.x, man.y, 50, 50)
+		loseExplosion.ele.currentFrameColumns += 1;
+		if(loseExplosion.ele.currentFrameColumns > 8){
+			loseExplosion.ele.currentFrameColumns = 0
+			loseExplosion.ele.currentFrameRows += 1;
+		}
+		if(loseExplosion.ele.currentFrameRows > 19){
+			gameover.status = 1;
+		}
+	}
+
+	function loseDraw(){
+		//보스스테이지 lose
+		if(stage[currentTileStage].length == currentStage + 1){
+
+			if(stage[currentTileStage][currentStage].monster[2] == "bossGrass"){
+				grassBossAudio.pause()
+				grassBossAudio.currentTime = 0;
+			}
+			if(currentTileStage == 1){
+				desertBossAudio.pause()
+				desertBossAudio.currentTime = 0
+				desertBossDieAudio.pause()
+				desertBossDieAudio.currentTime = 0
+				creepyAudio.pause()
+				creepyAudio.currentTime = 0
+				beforeExplosionAudio.pause()
+				beforeExplosionAudio.currentTime = 0
+				explosionAudio.pause()
+				explosionAudio.currentTime = 0
+			}
+		}
+
+		if(currentTileStage == 0){
+			islandAudio.pause()
+			islandAudio.currentTime = 0
+		}
+		if(currentTileStage == 1){
+			desertAudio.pause()
+			desertAudio.currentTime = 0
+		}
+		eatCoinAudio.pause()
+		eatCoinAudio.currentTime = 0
+
+		marioDieYoAudio.play()
+
+		loseExplosionDraw()
+
+	}
+
+	//game over
+	gameover = {}
+	gameover.status = 0;
+
+	var gameoverImage = new Image()
+	gameoverImage.src = "./img/gameover.png"
+
+	function gameoverDraw(){
+
+		ctx.drawImage(gameoverImage, 0, 0, c.width, c.height)
+		marioDieYoAudio.pause()
+		marioDieYoAudio.currentTime = 0
+		
+		gameoverAudio.play()
+
+	}
+
+	//drawFuncㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+	function draw(){
+	
+	ctx.clearRect(0, 0, c.width, c.height)
+	//loading
+	if(loading.status == 1 && gameover.status == 0){
+		loadingBackgroundDraw()
+
+		loadingArcLineDraw()
+		
+		loadingArcBallDraw()
+		
+		loadingTextDraw()
+	}
+
+	if(loading.status == 0 && stageBar.status == 1 && gameover.status == 0){
+		stageBarDraw()
+	}
+
+	if(loading.status == 0 && stageBar.status == 0 && gameover.status == 0){
+		//game start
+		ctx.globalAlpha = 1.0; //text투명도조절 초기값 복구
+		
+		tileDraw();
+
+		manDraw()
+
+		monsterStageChange()
+		
+		if(boss.stage.status == 1){
+		bossDraw()
+		}
+
+		monsterDraw()
+
+		coinDraw()
+
+		coinCollisionDetection()
+
+		cheakWinCondition()
+
+	}
+
+	if(lose.status == 1 && gameover.status == 0){
+
+		loseDraw()
+
+	}
+
+	if(gameover.status == 1){
+
+		gameoverDraw()
+
+	}
+
+	requestAnimationFrame(draw);
+
+	}
+
+	//가속도 이용 빙판 만들자  // 대각선으로 갈경우 speed 두개 적용되서 2배속도가됨
+	//final이 원본
+	//목숨 할건지 말건지 
+	//몬스터 추가
+
+	//swamp 1스테이지 낙타 따록 만들고
+	//2스테이지 난이도 하향후
+	//좀비스테이지 분할할까 말가
+	draw()
+
+	</script>
+</body>
+</html>
